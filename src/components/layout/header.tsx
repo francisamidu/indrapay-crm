@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "../notifications/notification-bell";
 import type { User } from "@/types";
 import { alerts, notifications } from "@/shared/notifications-data";
+import { useLocation } from "@tanstack/react-router";
+import { useMenuContext } from "@/contexts/menu-context";
 
 interface HeaderProps {
   user: User;
@@ -14,14 +16,20 @@ interface HeaderProps {
 
 export function Header({ user }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const { menuItems, pageRoles } = useMenuContext();
+  const pathname = useLocation().pathname;
+
+  const page =
+    menuItems.find((item) => item.href === pathname)?.name || "Dashboard";
 
   return (
-    <header className="bg-card border-b border-slate-50 px-6 py-2">
+    <header className="bg-gray-100 border-b !border-gray-100 px-6 py-2">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Monitor your payment gateway performance
+          <h1 className="text-xl font-bold">{page}</h1>
+          <p className="text-muted-foreground text-sm">
+            {pageRoles[menuItems.findIndex((item) => item.href === pathname)] ||
+              pageRoles[0]}
           </p>
         </div>
 

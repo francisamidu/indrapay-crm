@@ -10,33 +10,132 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as dashboardIndexRouteImport } from './routes/(dashboard)/index'
+import { Route as dashboardWalletManagementIndexRouteImport } from './routes/(dashboard)/wallet-management/index'
+import { Route as dashboardTransactionsIndexRouteImport } from './routes/(dashboard)/transactions/index'
+import { Route as dashboardReportsIndexRouteImport } from './routes/(dashboard)/reports/index'
+import { Route as dashboardPartnersIndexRouteImport } from './routes/(dashboard)/partners/index'
+import { Route as dashboardOperationsIndexRouteImport } from './routes/(dashboard)/operations/index'
+import { Route as dashboardCorridorsIndexRouteImport } from './routes/(dashboard)/corridors/index'
+import { Route as dashboardComplianceIndexRouteImport } from './routes/(dashboard)/compliance/index'
 
 const dashboardIndexRoute = dashboardIndexRouteImport.update({
   id: '/(dashboard)/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const dashboardWalletManagementIndexRoute =
+  dashboardWalletManagementIndexRouteImport.update({
+    id: '/(dashboard)/wallet-management/',
+    path: '/wallet-management/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const dashboardTransactionsIndexRoute =
+  dashboardTransactionsIndexRouteImport.update({
+    id: '/(dashboard)/transactions/',
+    path: '/transactions/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const dashboardReportsIndexRoute = dashboardReportsIndexRouteImport.update({
+  id: '/(dashboard)/reports/',
+  path: '/reports/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const dashboardPartnersIndexRoute = dashboardPartnersIndexRouteImport.update({
+  id: '/(dashboard)/partners/',
+  path: '/partners/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const dashboardOperationsIndexRoute =
+  dashboardOperationsIndexRouteImport.update({
+    id: '/(dashboard)/operations/',
+    path: '/operations/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const dashboardCorridorsIndexRoute = dashboardCorridorsIndexRouteImport.update({
+  id: '/(dashboard)/corridors/',
+  path: '/corridors/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const dashboardComplianceIndexRoute =
+  dashboardComplianceIndexRouteImport.update({
+    id: '/(dashboard)/compliance/',
+    path: '/compliance/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof dashboardIndexRoute
+  '/compliance': typeof dashboardComplianceIndexRoute
+  '/corridors': typeof dashboardCorridorsIndexRoute
+  '/operations': typeof dashboardOperationsIndexRoute
+  '/partners': typeof dashboardPartnersIndexRoute
+  '/reports': typeof dashboardReportsIndexRoute
+  '/transactions': typeof dashboardTransactionsIndexRoute
+  '/wallet-management': typeof dashboardWalletManagementIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof dashboardIndexRoute
+  '/compliance': typeof dashboardComplianceIndexRoute
+  '/corridors': typeof dashboardCorridorsIndexRoute
+  '/operations': typeof dashboardOperationsIndexRoute
+  '/partners': typeof dashboardPartnersIndexRoute
+  '/reports': typeof dashboardReportsIndexRoute
+  '/transactions': typeof dashboardTransactionsIndexRoute
+  '/wallet-management': typeof dashboardWalletManagementIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(dashboard)/': typeof dashboardIndexRoute
+  '/(dashboard)/compliance/': typeof dashboardComplianceIndexRoute
+  '/(dashboard)/corridors/': typeof dashboardCorridorsIndexRoute
+  '/(dashboard)/operations/': typeof dashboardOperationsIndexRoute
+  '/(dashboard)/partners/': typeof dashboardPartnersIndexRoute
+  '/(dashboard)/reports/': typeof dashboardReportsIndexRoute
+  '/(dashboard)/transactions/': typeof dashboardTransactionsIndexRoute
+  '/(dashboard)/wallet-management/': typeof dashboardWalletManagementIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/compliance'
+    | '/corridors'
+    | '/operations'
+    | '/partners'
+    | '/reports'
+    | '/transactions'
+    | '/wallet-management'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/(dashboard)/'
+  to:
+    | '/'
+    | '/compliance'
+    | '/corridors'
+    | '/operations'
+    | '/partners'
+    | '/reports'
+    | '/transactions'
+    | '/wallet-management'
+  id:
+    | '__root__'
+    | '/(dashboard)/'
+    | '/(dashboard)/compliance/'
+    | '/(dashboard)/corridors/'
+    | '/(dashboard)/operations/'
+    | '/(dashboard)/partners/'
+    | '/(dashboard)/reports/'
+    | '/(dashboard)/transactions/'
+    | '/(dashboard)/wallet-management/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   dashboardIndexRoute: typeof dashboardIndexRoute
+  dashboardComplianceIndexRoute: typeof dashboardComplianceIndexRoute
+  dashboardCorridorsIndexRoute: typeof dashboardCorridorsIndexRoute
+  dashboardOperationsIndexRoute: typeof dashboardOperationsIndexRoute
+  dashboardPartnersIndexRoute: typeof dashboardPartnersIndexRoute
+  dashboardReportsIndexRoute: typeof dashboardReportsIndexRoute
+  dashboardTransactionsIndexRoute: typeof dashboardTransactionsIndexRoute
+  dashboardWalletManagementIndexRoute: typeof dashboardWalletManagementIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +147,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof dashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(dashboard)/wallet-management/': {
+      id: '/(dashboard)/wallet-management/'
+      path: '/wallet-management'
+      fullPath: '/wallet-management'
+      preLoaderRoute: typeof dashboardWalletManagementIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(dashboard)/transactions/': {
+      id: '/(dashboard)/transactions/'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof dashboardTransactionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(dashboard)/reports/': {
+      id: '/(dashboard)/reports/'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof dashboardReportsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(dashboard)/partners/': {
+      id: '/(dashboard)/partners/'
+      path: '/partners'
+      fullPath: '/partners'
+      preLoaderRoute: typeof dashboardPartnersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(dashboard)/operations/': {
+      id: '/(dashboard)/operations/'
+      path: '/operations'
+      fullPath: '/operations'
+      preLoaderRoute: typeof dashboardOperationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(dashboard)/corridors/': {
+      id: '/(dashboard)/corridors/'
+      path: '/corridors'
+      fullPath: '/corridors'
+      preLoaderRoute: typeof dashboardCorridorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(dashboard)/compliance/': {
+      id: '/(dashboard)/compliance/'
+      path: '/compliance'
+      fullPath: '/compliance'
+      preLoaderRoute: typeof dashboardComplianceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   dashboardIndexRoute: dashboardIndexRoute,
+  dashboardComplianceIndexRoute: dashboardComplianceIndexRoute,
+  dashboardCorridorsIndexRoute: dashboardCorridorsIndexRoute,
+  dashboardOperationsIndexRoute: dashboardOperationsIndexRoute,
+  dashboardPartnersIndexRoute: dashboardPartnersIndexRoute,
+  dashboardReportsIndexRoute: dashboardReportsIndexRoute,
+  dashboardTransactionsIndexRoute: dashboardTransactionsIndexRoute,
+  dashboardWalletManagementIndexRoute: dashboardWalletManagementIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

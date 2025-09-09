@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DISPUTE_STATUS {
+  PENDING
+  RESOLVED
+  REJECTED
+}
+
+enum LIMIT_TYPE {
+  USER
+  ACCOUNT_TYPE
+  COUNTRY
+}
+
+enum QUEUE_TASK_TYPE {
+  PAYMENT_PROCESSING
+  NOTIFICATION
+  WEBHOOK
+  COMPLIANCE_CHECK
+}
+
+enum QUEUE_STATUS {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum REFERRAL_STATUS {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum API_KEY_STATUS {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+model Indra_Dispute_Information {
+  id                                        String                                 @id @default(uuid()) @db.Uuid
+  dispute_payment_informationId             String                                 @db.Uuid // Links to payment
+  dispute_user_informationId                String                                 @db.Uuid // Links to user initiating dispute
+  dispute_wallet_ledger_entry_informationId String?                                @db.Uuid // Links to reversal ledger entry
+  dispute_reason                            String                                 @db.VarChar(500) // e.g., unauthorized, non-delivered
+  dispute_status                            DISPUTE_STATUS                         @default(PENDING) // e.g., PENDING, RESOLVED, REJECTED
+  dispute_resolution_details                Json? // Resolution notes
+  dispute_reference_id                      String?                                @unique @db.VarChar(100) // External system integration
+  dispute_created_at                        DateTime                               @default(now())
+  dispute_updated_at                        DateTime                               @updatedAt
+  dispute_deleted_at                        DateTime?
+  dispute_payment_information               Indra_Payment_Information              @relation(name: "PaymentDisputeInformation", fields: [dispute_payment_informationId], references: [id], onDelete: Restrict)
+  dispute_user_information                  Indra_User_Account_Profile_Information @relation(name: "UserDisputeInformation", fields: [dispute_user_informationId], references: [id], onDelete: Restrict)
+  dispute_wallet_ledger_entry_information   Indra_Wallet_Ledger_Entry_Information? @relation(name: "DisputeLedgerEntryInformation", fields: [dispute_wallet_ledger_entry_informationId], references: [id], onDelete: SetNull)
+  dispute_notifications_information         Indra_Notification_Information[]       @relation(name: "DisputeNotificationInformation")
+
+  @@index([dispute_payment_informationId])
+  @@index([dispute_user_informationId])
+  @@index([dispute_wallet_ledger_entry_informationId])
+  @@index([dispute_status])
+}
+
+model Indra_Limit_Config_Information {
+  id                     String                                  @id @default(uuid()) @db.Uuid
+  limit_user_id          String?                                 @db.Uuid // Links to user (null for global limits)
+  limit_type             LIMIT_TYPE // e.g., USER, ACCOUNT_TYPE, COUNTRY
+  limit_currency         String                                  @db.VarChar(3) // ISO 4217, e.g., KES, USD
+  limit_country_code     String?                                 @db.VarChar(2) // ISO 3166-1 alpha-2, e.g., KE, US
+  limit_daily_limit      Decimal?                                @db.Decimal(19, 4) // Daily transaction limit
+  limit_monthly_limit    Decimal?                                @db.Decimal(19, 4) // Monthly transaction limit
+  limit_per_tx_limit     Decimal?                                @db.Decimal(19, 4) // Per-transaction limit
+  limit_reference_id     String?                                 @unique @db.VarChar(100) // External system integration
+  limit_created_at       DateTime                                @default(now())
+  limit_updated_at       DateTime                                @updatedAt
+  limit_deleted_at       DateTime?
+  limit_user_information Indra_User_Account_Profile_Information? @relation(name: "UserLimitConfigInformation", fields: [limit_user_id], references: [id], onDelete: SetNull)
+
+  @@index([limit_user_id])
+  @@index([limit_type])
+  @@index([limit_country_code])
+}
+
+model Indra_Queue_Information {
+  id                 String          @id @default(uuid()) @db.Uuid
+  queue_task_type    QUEUE_TASK_TYPE // e.g., PAYMENT_PROCESSING, NOTIFICATION, WEBHOOK
+  queue_payload      Json? // Task data
+  queue_status       QUEUE_STATUS    @default(PENDING) // e.g., PENDING, PROCESSING, COMPLETED, FAILED
+  queue_priority     Int             @default(100) // Lower number = higher priority
+  queue_retry_count  Int             @default(0) // Failed attempts
+  queue_scheduled_at DateTime        @default(now()) // Scheduled execution time
+  queue_completed_at DateTime? // Completion timestamp
+  queue_reference_id String?         @unique @db.VarChar(100) // External system integration
+  queue_created_at   DateTime        @default(now())
+  queue_updated_at   DateTime        @updatedAt
+  queue_deleted_at   DateTime?
+
+  @@index([queue_task_type])
+  @@index([queue_status])
+  @@index([queue_scheduled_at])
+}
+
+model Indra_Referral_Information {
+  id                                 String                                 @id @default(uuid()) @db.Uuid
+  referral_referrer_id               String                                 @db.Uuid // Links to referrer
+  referral_referred_user_id          String                                 @db.Uuid // Links to referred user
+  referral_ledger_entry_id           String?                                @db.Uuid // Links to reward ledger entry
+  referral_reward_amount             Decimal                                @db.Decimal(19, 4) // Reward amount
+  referral_currency                  String                                 @db.VarChar(3) // ISO 4217, e.g., KES, USD
+  referral_status                    REFERRAL_STATUS                        @default(PENDING) // e.g., PENDING, COMPLETED, CANCELLED
+  referral_reference_id              String?                                @unique @db.VarChar(100) // External system integration
+  referral_created_at                DateTime                               @default(now())
+  referral_updated_at                DateTime                               @updatedAt
+  referral_deleted_at                DateTime?
+  referral_referrer_information      Indra_User_Account_Profile_Information @relation(name: "ReferrerInformation", fields: [referral_referrer_id], references: [id], onDelete: Restrict)
+  referral_referred_user_information Indra_User_Account_Profile_Information @relation(name: "ReferredUserInformation", fields: [referral_referred_user_id], references: [id], onDelete: Restrict)
+  referral_ledger_entry_information  Indra_Wallet_Ledger_Entry_Information? @relation(name: "ReferralLedgerEntryInformation", fields: [referral_ledger_entry_id], references: [id], onDelete: SetNull)
+  referral_notifications_information Indra_Notification_Information[]       @relation(name: "ReferralNotificationInformation")
+
+  @@index([referral_referrer_id])
+  @@index([referral_referred_user_id])
+  @@index([referral_ledger_entry_id])
+  @@index([referral_status])
+}
+
+model Indra_Country_Config_Information {
+  id                   String    @id @default(uuid()) @db.Uuid
+  country_code         String    @unique @db.VarChar(2) // ISO 3166-1 alpha-2, e.g., KE, US
+  supported_currencies String[]  @db.VarChar(3) // Array of ISO 4217 codes, e.g., ["USD", "KES"]
+  kyc_required         Boolean   @default(false) // KYC mandate
+  max_tx_amount        Decimal?  @db.Decimal(19, 4) // Maximum transaction amount
+  country_reference_id String?   @unique @db.VarChar(100) // External system integration
+  country_created_at   DateTime  @default(now())
+  country_updated_at   DateTime  @updatedAt
+  country_deleted_at   DateTime?
+
+  @@index([country_code])
+}
+
+model Indra_API_Key_Information {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  api_key_partner_id          String                    @db.Uuid // Links to partner
+  api_key_key                 String                    @unique @db.VarChar(255) // Encrypted API key
+  api_key_scopes              String[]                  @db.VarChar(100) // e.g., ["payments:read", "settlements:write"]
+  api_key_status              API_KEY_STATUS            @default(ACTIVE) // e.g., ACTIVE, REVOKED, EXPIRED
+  api_key_expires_at          DateTime? // Key expiration
+  api_key_reference_id        String?                   @unique @db.VarChar(100) // External system integration
+  api_key_created_at          DateTime                  @default(now())
+  api_key_updated_at          DateTime                  @updatedAt
+  api_key_deleted_at          DateTime?
+  api_key_partner_information Indra_Partner_Information @relation(name: "PartnerAPIKeyInformation", fields: [api_key_partner_id], references: [id], onDelete: Restrict)
+
+  @@index([api_key_partner_id])
+  @@index([api_key_status])
+}

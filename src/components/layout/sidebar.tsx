@@ -1,66 +1,20 @@
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "@tanstack/react-router";
 import { LogoIcon } from "../logo";
-import {
-  IconLayoutSidebar as SidebarIcon1,
-  IconLayoutSidebarFilled as SidebarIcon2,
-  IconLayout2 as DashboardIcon1,
-  IconLayout2Filled as DashboardIcon2,
-  IconUsers as UsersIcon,
-  IconUserFilled as UsersIcon2,
-  IconCurrencyDollar as TransactionsIcon,
-  IconReceiptDollarFilled as TransactionsIcon2,
-  IconChartPie as ReportsIcon,
-  IconChartPieFilled as ReportsIcon2,
-  IconCopyCheck as ComplianceIcon1,
-  IconCopyCheckFilled as ComplianceIcon2,
-  IconReceiptEuro as CorridorIcon1,
-  IconReceiptEuroFilled as CorridorIcon2,
-} from "@tabler/icons-react";
-import { Button } from "../ui/button";
 
-const navigation = [
-  {
-    name: "Dashboard",
-    href: "/",
-    icon: <DashboardIcon1 />,
-    activeIcon: <DashboardIcon2 />,
-  },
-  {
-    name: "Customers",
-    href: "/dashboard/customers",
-    icon: <UsersIcon />,
-    activeIcon: <UsersIcon2 />,
-  },
-  {
-    name: "Transactions",
-    href: "/dashboard/transactions",
-    icon: <TransactionsIcon />,
-    activeIcon: <TransactionsIcon2 />,
-  },
-  {
-    name: "Corridors",
-    href: "/dashboard/corridors",
-    icon: <CorridorIcon1 />,
-    activeIcon: <CorridorIcon2 />,
-  },
-  {
-    name: "Compliance",
-    href: "/dashboard/compliance",
-    icon: <ComplianceIcon1 />,
-    activeIcon: <ComplianceIcon2 />,
-  },
-  {
-    name: "Reports",
-    href: "/dashboard/reports",
-    icon: <ReportsIcon />,
-    activeIcon: <ReportsIcon2 />,
-  },
-];
+import { Button } from "../ui/button";
+import { useMenuContext } from "@/contexts/menu-context";
+
+import { IconLayoutSidebar as SidebarIcon1 } from "@tabler/icons-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  IconMoon as DarkIcon,
+  IconSun as LightIcon,
+} from "@tabler/icons-react";
 
 export function Sidebar() {
   const pathname = useLocation().pathname;
-
+  const { menuItems: navigation } = useMenuContext();
   return (
     <div className="w-64 !bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col h-full overflow-y-auto fixed top-0 left-0 z-20">
       <div className="flex flex-grow flex-col overflow-y-auto pt-5">
@@ -73,8 +27,8 @@ export function Sidebar() {
             <SidebarIcon1 />
           </Button>
         </div>
-        <div className="mt-8 flex flex-1 flex-col">
-          <nav className="flex-1 space-y-1 px-2 pb-4">
+        <div className="mt-8 flex flex-1 flex-col px-2">
+          <nav className="flex-1 space-y-1  pb-4">
             {navigation.map((item) => {
               const isActive =
                 item.href === "/"
@@ -86,9 +40,9 @@ export function Sidebar() {
                   to={item.href}
                   className={cn(
                     isActive
-                      ? "bg-gray-200 !border-teal-800"
+                      ? " !border-primary !text-primary bg-primary/10 font-medium"
                       : "text-muted-foreground hover:bg-accent",
-                    "group border-l-4 border-transparent flex items-center rounded-md px-2 py-2 text-sm font-medium transition-all duration-200"
+                    "hover:bg-primary/10 group border-l-4 border-transparent flex items-center rounded-md px-2 py-2 text-sm font-medium transition-all duration-200"
                   )}
                 >
                   <span
@@ -102,6 +56,24 @@ export function Sidebar() {
               );
             })}
           </nav>
+          <Tabs defaultValue="light">
+            <TabsList className="bg-transparent border rounded-md p-1 w-full">
+              <TabsTrigger value="light" asChild>
+                <Button variant="ghost">
+                  {" "}
+                  <LightIcon className="mr-2" />
+                  Light
+                </Button>
+              </TabsTrigger>
+              <TabsTrigger value="dark" asChild>
+                <Button variant="ghost">
+                  {" "}
+                  <DarkIcon className="mr-2" />
+                  Dark
+                </Button>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
     </div>
