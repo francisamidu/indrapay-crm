@@ -23,7 +23,7 @@ export function Header({ user }: HeaderProps) {
     menuItems.find((item) => item.href === pathname)?.name || "Dashboard";
 
   return (
-    <header className="bg-gray-100 border-b !border-gray-100 px-6 py-2">
+    <header className="bg-gray-100 border-b !border-gray-100 px-6 py-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold">{page}</h1>

@@ -301,8 +301,8 @@ export function OperationsTools() {
 
           <div className="grid gap-4">
             {bulkPayouts.map((payout) => (
-              <Card key={payout.id}>
-                <CardContent className="p-6">
+              <Card key={payout.id} className="!py-4">
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -715,7 +715,7 @@ export function OperationsTools() {
 
           <div className="grid gap-4">
             {supportTickets.map((ticket) => (
-              <Card key={ticket.id}>
+              <Card key={ticket.id} className="!py-4">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">

@@ -23,9 +23,9 @@ function RootComponent() {
       <QueryProvider>
         <MenuContextProvider>
           <Sidebar />
-          <div className="flex flex-col flex-1 overflow-hidden ml-64">
+          <div className="flex flex-col flex-1 bg-gray-100 overflow-hidden ml-64">
             <Header user={user} />
-            <main className="flex-1 overflow-auto p-6 bg-white min-h-screen rounded-tl-lg">
+            <main className="flex-1 overflow-auto p-6 bg-white min-h-screen rounded-2xl">
               <Outlet />
             </main>
           </div>
