@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { NotificationIcon } from "@/components/dashboard/notifications/notification-icon";
+import { NotificationIcon } from "./notification-icon";
 import type { Notification } from "@/types/notification";
 
 interface NotificationDetailsProps {

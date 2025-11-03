@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { NotificationIcon } from "@/components/dashboard/notifications/notification-icon";
+import { NotificationIcon } from "./notification-icon";
 import type { Notification, NotificationFilter } from "@/types/notification";
 import { Edit } from "lucide-react";
 
@@ -127,10 +127,10 @@ export function NotificationList({
                       notification.type === "ticket"
                         ? "bg-blue-50 text-blue-700 border-blue-200"
                         : notification.type === "message"
-                        ? "bg-green-50 text-green-700 border-green-200"
-                        : notification.type === "team"
-                        ? "bg-purple-50 text-purple-700 border-purple-200"
-                        : "bg-amber-50 text-amber-700 border-amber-200"
+                          ? "bg-green-50 text-green-700 border-green-200"
+                          : notification.type === "team"
+                            ? "bg-purple-50 text-purple-700 border-purple-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200"
                     }`}
                   >
                     {notification.type}
