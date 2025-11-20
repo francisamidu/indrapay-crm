@@ -1,34 +1,20 @@
-// Basic types that will be expanded as we build the application
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: "admin" | "agent" | "compliance";
+// ============================================================================
+// Type Definitions
+// ============================================================================
+
+// Base API Response Types
+interface BaseApiResponse<T> {
+  success: boolean;
+  resultCode: string;
+  resultDescription: string;
+  transactionId: string;
+  data: T;
 }
 
-export interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  status: "active" | "suspended" | "closed";
-  createdAt: Date;
-  walletBalance: number;
+interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
 }
-
-export interface Transaction {
-  id: string;
-  amount: number;
-  currency: string;
-  status: "pending" | "completed" | "failed" | "refunded";
-  createdAt: Date;
-  customerId: string;
-  corridorId: string;
-}
-
-export * from "./common";
-export * from "./api-envelope";
-export * from "./auth";
-export * from "./forex";
-export * from "./wallet";
-export * from "./ledger";
-export * from "./fees";
+export type { BaseApiResponse, PaginatedResponse };

@@ -1,59 +1,37 @@
-export interface Partner {
+interface Partner {
   id: string;
   name: string;
-  businessName: string;
+  businessType:
+    | "BANK"
+    | "FINTECH"
+    | "MERCHANT"
+    | "AGGREGATOR"
+    | "MNO"
+    | "OTHER";
   email: string;
-  phone: string;
+  phoneNumber: string;
   country: string;
-  status: "active" | "suspended" | "pending" | "inactive";
-  registrationDate: string;
-  lastActivity: string;
-  totalVolume: number;
-  monthlyVolume: number;
-  transactionCount: number;
-  successRate: number;
-  avgSettlementTime: number;
-  feeStructure: {
-    transactionFee: number;
-    settlementFee: number;
-    monthlyFee: number;
-  };
-  payoutChannels: string[];
-  contactPerson: {
-    name: string;
-    email: string;
-    phone: string;
-    role: string;
-  };
-  bankDetails: {
-    accountName: string;
-    accountNumber: string;
-    bankName: string;
-    routingNumber: string;
-    currency: string;
-  };
-  documents: {
-    businessLicense: string;
-    taxCertificate: string;
-    serviceAgreement: string;
-  };
-  performanceMetrics: {
-    uptime: number;
-    avgResponseTime: number;
-    errorRate: number;
-  };
+  status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
+  settlementCurrency: string;
+  settlementFrequency: "DAILY" | "WEEKLY" | "MONTHLY";
+  settlementThreshold?: number;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface SettlementReport {
-  id: string;
-  partnerId: string;
-  partnerName: string;
-  period: string;
-  totalTransactions: number;
-  totalVolume: number;
-  totalFees: number;
-  netAmount: number;
-  status: "pending" | "processed" | "failed";
-  generatedDate: string;
-  processedDate?: string;
+interface CreatePartnerRequest {
+  name: string;
+  businessType: Partner["businessType"];
+  email: string;
+  phoneNumber: string;
+  country: string;
+  address?: string;
+  contactPerson?: string;
+  settlementCurrency: string;
+  settlementFrequency?: Partner["settlementFrequency"];
+  settlementThreshold?: number;
+  metadata?: Record<string, any>;
 }
+
+export type { Partner, CreatePartnerRequest };

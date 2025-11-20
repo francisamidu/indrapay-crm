@@ -1,35 +1,37 @@
-export interface MonthlyVolumeData {
-  month: string;
-  volume: number;
-  transactions: number;
+interface DashboardKPIs {
+  transactions: {
+    total: number;
+    successful: number;
+    failed: number;
+    volume: number;
+    growthRate: number;
+  };
+  customers: {
+    activeWallets: number;
+    newCustomers: number;
+    pendingKyc: number;
+    verificationRate: number;
+  };
+  compliance: {
+    openCases: number;
+    resolvedCases: number;
+    avgResolutionTime: number;
+    highPriorityCases: number;
+  };
+  corridors: {
+    activeCorridors: number;
+    totalVolume: number;
+    topPerforming: Array<{
+      corridorId: string;
+      corridorName: string;
+      sourceCurrency: string;
+      targetCurrency: string;
+      totalVolume: number;
+      transactionCount: number;
+      successRate: number;
+      avgProcessingTime: number;
+    }>;
+  };
 }
 
-export interface CorridorData {
-  name: string;
-  transactions: number;
-  volume: number;
-  color: string;
-}
-
-export interface Transaction {
-  id: string;
-  amount: number;
-  status: "success" | "failed" | "pending";
-  customer: string;
-  corridor: string;
-  timestamp: string;
-}
-
-export interface KPIData {
-  totalTransactions: number;
-  activeWallets: number;
-  successRate: number;
-  totalVolume: number;
-}
-
-export interface DashboardAlert {
-  id: string;
-  type: "error" | "warning" | "info";
-  message: string;
-  timestamp: string;
-}
+export type { DashboardKPIs };

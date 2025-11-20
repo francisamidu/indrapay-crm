@@ -1,25 +1,48 @@
-export interface Corridor {
+interface Corridor {
   id: string;
-  name: string;
-  fromCountry: string;
-  toCountry: string;
-  fromCurrency: string;
-  toCurrency: string;
-  status: "active" | "inactive" | "maintenance";
-  feeType: "fixed" | "percentage";
-  feeValue: number;
-  exchangeRate: number;
-  rateSource: "manual" | "provider";
-  volume24h: number;
-  successRate: number;
-  transactionCount: number;
-  lastUpdated: string;
+  sourceCurrency: string;
+  targetCurrency: string;
+  targetCountry: string;
+  baseRate: number;
+  markup: number;
+  fixedFee?: number;
+  percentageFee?: number;
+  minAmount: number;
+  maxAmount: number;
+  dailyLimit?: number;
+  monthlyLimit?: number;
+  riskLevel: "LOW" | "MEDIUM" | "HIGH";
+  requiresApproval: boolean;
+  status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface CorridorKPIs {
-  totalCorridors: { count: number; change: number };
-  activeCorridors: { count: number; change: number };
-  totalVolume: { amount: number; change: number };
-  avgSuccessRate: { rate: number; change: number };
-  maintenanceRequired: { count: number; change: number };
+interface CreateCorridorRequest {
+  sourceCurrency: string;
+  targetCurrency: string;
+  targetCountry: string;
+  baseRate: number;
+  markup: number;
+  fixedFee?: number;
+  percentageFee?: number;
+  minAmount: number;
+  maxAmount: number;
+  dailyLimit?: number;
+  monthlyLimit?: number;
+  riskLevel?: "LOW" | "MEDIUM" | "HIGH";
+  requiresApproval?: boolean;
+  metadata?: Record<string, any>;
 }
+
+interface CorridorSearchParams {
+  sourceCurrency?: string;
+  targetCurrency?: string;
+  targetCountry?: string;
+  status?: Corridor["status"];
+  riskLevel?: Corridor["riskLevel"];
+  page?: number;
+  limit?: number;
+}
+export type { Corridor, CreateCorridorRequest, CorridorSearchParams };

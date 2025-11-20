@@ -1,29 +1,351 @@
-import type { BaseApiResponse, PaginatedResponse } from "@/types";
-import type {
-  LoginRequest,
-  LoginResponse,
-  RefreshTokenRequest,
-  CrmUser,
-  ChangePasswordRequest,
-} from "@/types/auth";
-import type { BusinessSearchParams, Business } from "@/types/business";
-import type { CaseSearchParams, Case, CreateCaseRequest } from "@/types/case";
-import type { Customer } from "@/types/compliance";
-import type {
-  CorridorSearchParams,
-  Corridor,
-  CreateCorridorRequest,
-} from "@/types/corridors";
-import type { CustomerSearchParams } from "@/types/customer";
-import type { DashboardKPIs } from "@/types/dashboard";
-import { ApiError } from "@/types/error";
-import type { Partner, CreatePartnerRequest } from "@/types/partners";
-import type {
-  TransactionSearchParams,
-  Transaction,
-  RefundRequest,
-} from "@/types/transactions";
-import type { Wallet } from "@/types/wallet";
+// ============================================================================
+// Type Definitions
+// ============================================================================
+
+// Base API Response Types
+interface BaseApiResponse<T> {
+  success: boolean;
+  resultCode: string;
+  resultDescription: string;
+  transactionId: string;
+  data: T;
+}
+
+interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// Auth Types
+interface CrmUser {
+  id: string;
+  username: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  roles: string[];
+  permissions?: string[];
+  isActive: boolean;
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
+interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  user: CrmUser;
+}
+
+interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+// Customer Types
+interface Customer {
+  id: string;
+  email: string;
+  phoneNumber?: string;
+  walletId?: string;
+  countryCode?: string;
+  kycStatus: "PENDING" | "APPROVED" | "REJECTED" | "UNDER_REVIEW";
+  status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CustomerSearchParams {
+  email?: string;
+  phoneNumber?: string;
+  walletId?: string;
+  countryCode?: string;
+  kycStatus?: Customer["kycStatus"];
+  page?: number;
+  limit?: number;
+}
+
+// Wallet Types
+interface Wallet {
+  wallet_reference_number: string;
+  wallet_currency: string;
+  wallet_status: "ACTIVE" | "INACTIVE" | "FROZEN";
+  wallet_is_frozen: boolean;
+  wallet_balance: number;
+  wallet_ledger_balance: number;
+  wallet_pending_holds: number;
+  wallet_country_code: string | null;
+}
+
+interface FreezeWalletRequest {
+  reason: string;
+}
+
+// Transaction Types
+interface Transaction {
+  id: string;
+  ledger_entry_type:
+    | "FUND"
+    | "WITHDRAW"
+    | "TRANSFER"
+    | "CONVERT"
+    | "FEE"
+    | "TAX";
+  ledger_entry_amount: number;
+  ledger_entry_currency: string;
+  ledger_entry_status:
+    | "PENDING"
+    | "COMPLETED"
+    | "FAILED"
+    | "REVERSED"
+    | "INITIATED";
+  ledger_entry_fee_amount?: number;
+  ledger_entry_created_at_information: string;
+  ledger_entry_debit_wallet_informationId?: string;
+  ledger_entry_credit_wallet_informationId?: string;
+}
+
+interface TransactionSearchParams {
+  transactionId?: string;
+  userId?: string;
+  walletId?: string;
+  status?: Transaction["ledger_entry_status"];
+  currency?: string;
+  railType?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+}
+
+interface RefundRequest {
+  amount: number;
+  reason: string;
+}
+
+interface ReverseTransactionRequest {
+  reason: string;
+}
+
+// Corridor Types
+interface Corridor {
+  id: string;
+  sourceCurrency: string;
+  targetCurrency: string;
+  targetCountry: string;
+  baseRate: number;
+  markup: number;
+  fixedFee?: number;
+  percentageFee?: number;
+  minAmount: number;
+  maxAmount: number;
+  dailyLimit?: number;
+  monthlyLimit?: number;
+  riskLevel: "LOW" | "MEDIUM" | "HIGH";
+  requiresApproval: boolean;
+  status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreateCorridorRequest {
+  sourceCurrency: string;
+  targetCurrency: string;
+  targetCountry: string;
+  baseRate: number;
+  markup: number;
+  fixedFee?: number;
+  percentageFee?: number;
+  minAmount: number;
+  maxAmount: number;
+  dailyLimit?: number;
+  monthlyLimit?: number;
+  riskLevel?: "LOW" | "MEDIUM" | "HIGH";
+  requiresApproval?: boolean;
+  metadata?: Record<string, any>;
+}
+
+interface CorridorSearchParams {
+  sourceCurrency?: string;
+  targetCurrency?: string;
+  targetCountry?: string;
+  status?: Corridor["status"];
+  riskLevel?: Corridor["riskLevel"];
+  page?: number;
+  limit?: number;
+}
+
+// Case Types
+
+interface Case {
+  id: string;
+  title: string;
+  description: string;
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  category: "TRANSACTION" | "COMPLIANCE" | "TECHNICAL" | "ACCOUNT" | "OTHER";
+  status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+  customerId?: string;
+  transactionId?: string;
+  assigneeId?: string;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreateCaseRequest {
+  title: string;
+  description: string;
+  priority?: Case["priority"];
+  category: Case["category"];
+  customerId?: string;
+  transactionId?: string;
+  metadata?: Record<string, any>;
+}
+
+interface CaseSearchParams {
+  status?: Case["status"];
+  priority?: Case["priority"];
+  assigneeId?: string;
+  category?: Case["category"];
+  customerId?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+}
+
+// Partner Types
+interface Partner {
+  id: string;
+  name: string;
+  businessType:
+    | "BANK"
+    | "FINTECH"
+    | "MERCHANT"
+    | "AGGREGATOR"
+    | "MNO"
+    | "OTHER";
+  email: string;
+  phoneNumber: string;
+  country: string;
+  status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
+  settlementCurrency: string;
+  settlementFrequency: "DAILY" | "WEEKLY" | "MONTHLY";
+  settlementThreshold?: number;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreatePartnerRequest {
+  name: string;
+  businessType: Partner["businessType"];
+  email: string;
+  phoneNumber: string;
+  country: string;
+  address?: string;
+  contactPerson?: string;
+  settlementCurrency: string;
+  settlementFrequency?: Partner["settlementFrequency"];
+  settlementThreshold?: number;
+  metadata?: Record<string, any>;
+}
+
+// Business Types
+interface Business {
+  id: string;
+  name: string;
+  registrationNumber?: string;
+  email: string;
+  phoneNumber: string;
+  country: string;
+  status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
+  kycStatus: "PENDING" | "APPROVED" | "REJECTED" | "UNDER_REVIEW";
+  industry?: string;
+  website?: string;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface BusinessSearchParams {
+  name?: string;
+  registrationNumber?: string;
+  status?: Business["status"];
+  kycStatus?: Business["kycStatus"];
+  country?: string;
+  page?: number;
+  limit?: number;
+}
+
+// Dashboard Types
+interface DashboardKPIs {
+  transactions: {
+    total: number;
+    successful: number;
+    failed: number;
+    volume: number;
+    growthRate: number;
+  };
+  customers: {
+    activeWallets: number;
+    newCustomers: number;
+    pendingKyc: number;
+    verificationRate: number;
+  };
+  compliance: {
+    openCases: number;
+    resolvedCases: number;
+    avgResolutionTime: number;
+    highPriorityCases: number;
+  };
+  corridors: {
+    activeCorridors: number;
+    totalVolume: number;
+    topPerforming: Array<{
+      corridorId: string;
+      corridorName: string;
+      sourceCurrency: string;
+      targetCurrency: string;
+      totalVolume: number;
+      transactionCount: number;
+      successRate: number;
+      avgProcessingTime: number;
+    }>;
+  };
+}
+
+// Error Types
+class ApiError extends Error {
+  constructor(
+    public statusCode: number,
+    public code: string,
+    message: string,
+    public details?: any
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+// ============================================================================
+// API Client Configuration
+// ============================================================================
+
 import ky, { type KyInstance, type Options } from "ky";
 
 interface ApiClientConfig {
@@ -1124,6 +1446,34 @@ class DashboardService {
 // Main IndraPay CRM API Client
 // ============================================================================
 
+/**
+ * IndraPay CRM API Client
+ * Main entry point for all CRM API operations
+ *
+ * @example
+ * ```typescript
+ * const crmApi = new IndraPayCrmApi({
+ *   baseUrl: 'https://api.indrapay.com',
+ *   timeout: 30000,
+ * });
+ *
+ * // Login
+ * const { accessToken, user } = await crmApi.auth.login({
+ *   username: 'admin@indrapay.com',
+ *   password: 'securePassword123!',
+ * });
+ *
+ * // Search customers
+ * const customers = await crmApi.customers.searchCustomers({
+ *   kycStatus: 'PENDING',
+ *   page: 1,
+ *   limit: 20,
+ * });
+ *
+ * // Get transaction details
+ * const transaction = await crmApi.transactions.getTransaction('txn-123');
+ * ```
+ */
 export class IndraPayCrmApi {
   private client: ApiClient;
 
@@ -1166,3 +1516,39 @@ export class IndraPayCrmApi {
     return this.client.getAccessToken();
   }
 }
+
+// ============================================================================
+// Export all types
+// ============================================================================
+
+export type {
+  ApiClientConfig,
+  BaseApiResponse,
+  PaginatedResponse,
+  CrmUser,
+  LoginRequest,
+  LoginResponse,
+  RefreshTokenRequest,
+  ChangePasswordRequest,
+  Customer,
+  CustomerSearchParams,
+  Wallet,
+  FreezeWalletRequest,
+  Transaction,
+  TransactionSearchParams,
+  RefundRequest,
+  ReverseTransactionRequest,
+  Corridor,
+  CreateCorridorRequest,
+  CorridorSearchParams,
+  Case,
+  CreateCaseRequest,
+  CaseSearchParams,
+  Partner,
+  CreatePartnerRequest,
+  Business,
+  BusinessSearchParams,
+  DashboardKPIs,
+};
+
+export { ApiError };
