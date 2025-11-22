@@ -12,6 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteRouteImport } from './routes/_dashboard/route'
 import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard/dashboard/index'
+import { Route as AuthVerifyEmailIndexRouteImport } from './routes/_auth/verify-email/index'
+import { Route as AuthSignupIndexRouteImport } from './routes/_auth/signup/index'
+import { Route as AuthRecoveryCodesIndexRouteImport } from './routes/_auth/recovery-codes/index'
+import { Route as AuthMfaVerifyIndexRouteImport } from './routes/_auth/mfa-verify/index'
+import { Route as AuthMfaSetupIndexRouteImport } from './routes/_auth/mfa-setup/index'
+import { Route as AuthForgotPasswordIndexRouteImport } from './routes/_auth/forgot-password/index'
 import { Route as DashboardDashboardWalletManagementIndexRouteImport } from './routes/_dashboard/dashboard/wallet-management/index'
 import { Route as DashboardDashboardTransactionsIndexRouteImport } from './routes/_dashboard/dashboard/transactions/index'
 import { Route as DashboardDashboardReportsIndexRouteImport } from './routes/_dashboard/dashboard/reports/index'
@@ -19,13 +25,7 @@ import { Route as DashboardDashboardPartnersIndexRouteImport } from './routes/_d
 import { Route as DashboardDashboardOperationsIndexRouteImport } from './routes/_dashboard/dashboard/operations/index'
 import { Route as DashboardDashboardCorridorsIndexRouteImport } from './routes/_dashboard/dashboard/corridors/index'
 import { Route as DashboardDashboardComplianceIndexRouteImport } from './routes/_dashboard/dashboard/compliance/index'
-import { Route as AuthAuthVerifyEmailIndexRouteImport } from './routes/_auth/auth/verify-email/index'
-import { Route as AuthAuthSignupIndexRouteImport } from './routes/_auth/auth/signup/index'
-import { Route as AuthAuthRecoveryCodesIndexRouteImport } from './routes/_auth/auth/recovery-codes/index'
-import { Route as AuthAuthMfaVerifyIndexRouteImport } from './routes/_auth/auth/mfa-verify/index'
-import { Route as AuthAuthMfaSetupIndexRouteImport } from './routes/_auth/auth/mfa-setup/index'
-import { Route as AuthAuthLoginIndexRouteImport } from './routes/_auth/auth/login/index'
-import { Route as AuthAuthForgotPasswordIndexRouteImport } from './routes/_auth/auth/forgot-password/index'
+import { Route as AuthAuthLoginIndexRouteImport } from './routes/_auth/_auth.login/index'
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/_dashboard',
@@ -39,6 +39,36 @@ const DashboardDashboardIndexRoute = DashboardDashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
   getParentRoute: () => DashboardRouteRoute,
+} as any)
+const AuthVerifyEmailIndexRoute = AuthVerifyEmailIndexRouteImport.update({
+  id: '/verify-email/',
+  path: '/verify-email/',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthSignupIndexRoute = AuthSignupIndexRouteImport.update({
+  id: '/signup/',
+  path: '/signup/',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthRecoveryCodesIndexRoute = AuthRecoveryCodesIndexRouteImport.update({
+  id: '/recovery-codes/',
+  path: '/recovery-codes/',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthMfaVerifyIndexRoute = AuthMfaVerifyIndexRouteImport.update({
+  id: '/mfa-verify/',
+  path: '/mfa-verify/',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthMfaSetupIndexRoute = AuthMfaSetupIndexRouteImport.update({
+  id: '/mfa-setup/',
+  path: '/mfa-setup/',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthForgotPasswordIndexRoute = AuthForgotPasswordIndexRouteImport.update({
+  id: '/forgot-password/',
+  path: '/forgot-password/',
+  getParentRoute: () => AuthRouteRoute,
 } as any)
 const DashboardDashboardWalletManagementIndexRoute =
   DashboardDashboardWalletManagementIndexRouteImport.update({
@@ -82,54 +112,21 @@ const DashboardDashboardComplianceIndexRoute =
     path: '/dashboard/compliance/',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
-const AuthAuthVerifyEmailIndexRoute =
-  AuthAuthVerifyEmailIndexRouteImport.update({
-    id: '/auth/verify-email/',
-    path: '/auth/verify-email/',
-    getParentRoute: () => AuthRouteRoute,
-  } as any)
-const AuthAuthSignupIndexRoute = AuthAuthSignupIndexRouteImport.update({
-  id: '/auth/signup/',
-  path: '/auth/signup/',
-  getParentRoute: () => AuthRouteRoute,
-} as any)
-const AuthAuthRecoveryCodesIndexRoute =
-  AuthAuthRecoveryCodesIndexRouteImport.update({
-    id: '/auth/recovery-codes/',
-    path: '/auth/recovery-codes/',
-    getParentRoute: () => AuthRouteRoute,
-  } as any)
-const AuthAuthMfaVerifyIndexRoute = AuthAuthMfaVerifyIndexRouteImport.update({
-  id: '/auth/mfa-verify/',
-  path: '/auth/mfa-verify/',
-  getParentRoute: () => AuthRouteRoute,
-} as any)
-const AuthAuthMfaSetupIndexRoute = AuthAuthMfaSetupIndexRouteImport.update({
-  id: '/auth/mfa-setup/',
-  path: '/auth/mfa-setup/',
-  getParentRoute: () => AuthRouteRoute,
-} as any)
 const AuthAuthLoginIndexRoute = AuthAuthLoginIndexRouteImport.update({
-  id: '/auth/login/',
-  path: '/auth/login/',
+  id: '/_auth/login/',
+  path: '/login/',
   getParentRoute: () => AuthRouteRoute,
 } as any)
-const AuthAuthForgotPasswordIndexRoute =
-  AuthAuthForgotPasswordIndexRouteImport.update({
-    id: '/auth/forgot-password/',
-    path: '/auth/forgot-password/',
-    getParentRoute: () => AuthRouteRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
+  '/forgot-password': typeof AuthForgotPasswordIndexRoute
+  '/mfa-setup': typeof AuthMfaSetupIndexRoute
+  '/mfa-verify': typeof AuthMfaVerifyIndexRoute
+  '/recovery-codes': typeof AuthRecoveryCodesIndexRoute
+  '/signup': typeof AuthSignupIndexRoute
+  '/verify-email': typeof AuthVerifyEmailIndexRoute
   '/dashboard': typeof DashboardDashboardIndexRoute
-  '/auth/forgot-password': typeof AuthAuthForgotPasswordIndexRoute
-  '/auth/login': typeof AuthAuthLoginIndexRoute
-  '/auth/mfa-setup': typeof AuthAuthMfaSetupIndexRoute
-  '/auth/mfa-verify': typeof AuthAuthMfaVerifyIndexRoute
-  '/auth/recovery-codes': typeof AuthAuthRecoveryCodesIndexRoute
-  '/auth/signup': typeof AuthAuthSignupIndexRoute
-  '/auth/verify-email': typeof AuthAuthVerifyEmailIndexRoute
+  '/login': typeof AuthAuthLoginIndexRoute
   '/dashboard/compliance': typeof DashboardDashboardComplianceIndexRoute
   '/dashboard/corridors': typeof DashboardDashboardCorridorsIndexRoute
   '/dashboard/operations': typeof DashboardDashboardOperationsIndexRoute
@@ -139,14 +136,14 @@ export interface FileRoutesByFullPath {
   '/dashboard/wallet-management': typeof DashboardDashboardWalletManagementIndexRoute
 }
 export interface FileRoutesByTo {
+  '/forgot-password': typeof AuthForgotPasswordIndexRoute
+  '/mfa-setup': typeof AuthMfaSetupIndexRoute
+  '/mfa-verify': typeof AuthMfaVerifyIndexRoute
+  '/recovery-codes': typeof AuthRecoveryCodesIndexRoute
+  '/signup': typeof AuthSignupIndexRoute
+  '/verify-email': typeof AuthVerifyEmailIndexRoute
   '/dashboard': typeof DashboardDashboardIndexRoute
-  '/auth/forgot-password': typeof AuthAuthForgotPasswordIndexRoute
-  '/auth/login': typeof AuthAuthLoginIndexRoute
-  '/auth/mfa-setup': typeof AuthAuthMfaSetupIndexRoute
-  '/auth/mfa-verify': typeof AuthAuthMfaVerifyIndexRoute
-  '/auth/recovery-codes': typeof AuthAuthRecoveryCodesIndexRoute
-  '/auth/signup': typeof AuthAuthSignupIndexRoute
-  '/auth/verify-email': typeof AuthAuthVerifyEmailIndexRoute
+  '/login': typeof AuthAuthLoginIndexRoute
   '/dashboard/compliance': typeof DashboardDashboardComplianceIndexRoute
   '/dashboard/corridors': typeof DashboardDashboardCorridorsIndexRoute
   '/dashboard/operations': typeof DashboardDashboardOperationsIndexRoute
@@ -159,14 +156,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteRouteWithChildren
   '/_dashboard': typeof DashboardRouteRouteWithChildren
+  '/_auth/forgot-password/': typeof AuthForgotPasswordIndexRoute
+  '/_auth/mfa-setup/': typeof AuthMfaSetupIndexRoute
+  '/_auth/mfa-verify/': typeof AuthMfaVerifyIndexRoute
+  '/_auth/recovery-codes/': typeof AuthRecoveryCodesIndexRoute
+  '/_auth/signup/': typeof AuthSignupIndexRoute
+  '/_auth/verify-email/': typeof AuthVerifyEmailIndexRoute
   '/_dashboard/dashboard/': typeof DashboardDashboardIndexRoute
-  '/_auth/auth/forgot-password/': typeof AuthAuthForgotPasswordIndexRoute
-  '/_auth/auth/login/': typeof AuthAuthLoginIndexRoute
-  '/_auth/auth/mfa-setup/': typeof AuthAuthMfaSetupIndexRoute
-  '/_auth/auth/mfa-verify/': typeof AuthAuthMfaVerifyIndexRoute
-  '/_auth/auth/recovery-codes/': typeof AuthAuthRecoveryCodesIndexRoute
-  '/_auth/auth/signup/': typeof AuthAuthSignupIndexRoute
-  '/_auth/auth/verify-email/': typeof AuthAuthVerifyEmailIndexRoute
+  '/_auth/_auth/login/': typeof AuthAuthLoginIndexRoute
   '/_dashboard/dashboard/compliance/': typeof DashboardDashboardComplianceIndexRoute
   '/_dashboard/dashboard/corridors/': typeof DashboardDashboardCorridorsIndexRoute
   '/_dashboard/dashboard/operations/': typeof DashboardDashboardOperationsIndexRoute
@@ -178,14 +175,14 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/forgot-password'
+    | '/mfa-setup'
+    | '/mfa-verify'
+    | '/recovery-codes'
+    | '/signup'
+    | '/verify-email'
     | '/dashboard'
-    | '/auth/forgot-password'
-    | '/auth/login'
-    | '/auth/mfa-setup'
-    | '/auth/mfa-verify'
-    | '/auth/recovery-codes'
-    | '/auth/signup'
-    | '/auth/verify-email'
+    | '/login'
     | '/dashboard/compliance'
     | '/dashboard/corridors'
     | '/dashboard/operations'
@@ -195,14 +192,14 @@ export interface FileRouteTypes {
     | '/dashboard/wallet-management'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/forgot-password'
+    | '/mfa-setup'
+    | '/mfa-verify'
+    | '/recovery-codes'
+    | '/signup'
+    | '/verify-email'
     | '/dashboard'
-    | '/auth/forgot-password'
-    | '/auth/login'
-    | '/auth/mfa-setup'
-    | '/auth/mfa-verify'
-    | '/auth/recovery-codes'
-    | '/auth/signup'
-    | '/auth/verify-email'
+    | '/login'
     | '/dashboard/compliance'
     | '/dashboard/corridors'
     | '/dashboard/operations'
@@ -214,14 +211,14 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_auth'
     | '/_dashboard'
+    | '/_auth/forgot-password/'
+    | '/_auth/mfa-setup/'
+    | '/_auth/mfa-verify/'
+    | '/_auth/recovery-codes/'
+    | '/_auth/signup/'
+    | '/_auth/verify-email/'
     | '/_dashboard/dashboard/'
-    | '/_auth/auth/forgot-password/'
-    | '/_auth/auth/login/'
-    | '/_auth/auth/mfa-setup/'
-    | '/_auth/auth/mfa-verify/'
-    | '/_auth/auth/recovery-codes/'
-    | '/_auth/auth/signup/'
-    | '/_auth/auth/verify-email/'
+    | '/_auth/_auth/login/'
     | '/_dashboard/dashboard/compliance/'
     | '/_dashboard/dashboard/corridors/'
     | '/_dashboard/dashboard/operations/'
@@ -258,6 +255,48 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardDashboardIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
+    }
+    '/_auth/verify-email/': {
+      id: '/_auth/verify-email/'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof AuthVerifyEmailIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/signup/': {
+      id: '/_auth/signup/'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof AuthSignupIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/recovery-codes/': {
+      id: '/_auth/recovery-codes/'
+      path: '/recovery-codes'
+      fullPath: '/recovery-codes'
+      preLoaderRoute: typeof AuthRecoveryCodesIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/mfa-verify/': {
+      id: '/_auth/mfa-verify/'
+      path: '/mfa-verify'
+      fullPath: '/mfa-verify'
+      preLoaderRoute: typeof AuthMfaVerifyIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/mfa-setup/': {
+      id: '/_auth/mfa-setup/'
+      path: '/mfa-setup'
+      fullPath: '/mfa-setup'
+      preLoaderRoute: typeof AuthMfaSetupIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/forgot-password/': {
+      id: '/_auth/forgot-password/'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/_dashboard/dashboard/wallet-management/': {
       id: '/_dashboard/dashboard/wallet-management/'
@@ -308,76 +347,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDashboardComplianceIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/_auth/auth/verify-email/': {
-      id: '/_auth/auth/verify-email/'
-      path: '/auth/verify-email'
-      fullPath: '/auth/verify-email'
-      preLoaderRoute: typeof AuthAuthVerifyEmailIndexRouteImport
-      parentRoute: typeof AuthRouteRoute
-    }
-    '/_auth/auth/signup/': {
-      id: '/_auth/auth/signup/'
-      path: '/auth/signup'
-      fullPath: '/auth/signup'
-      preLoaderRoute: typeof AuthAuthSignupIndexRouteImport
-      parentRoute: typeof AuthRouteRoute
-    }
-    '/_auth/auth/recovery-codes/': {
-      id: '/_auth/auth/recovery-codes/'
-      path: '/auth/recovery-codes'
-      fullPath: '/auth/recovery-codes'
-      preLoaderRoute: typeof AuthAuthRecoveryCodesIndexRouteImport
-      parentRoute: typeof AuthRouteRoute
-    }
-    '/_auth/auth/mfa-verify/': {
-      id: '/_auth/auth/mfa-verify/'
-      path: '/auth/mfa-verify'
-      fullPath: '/auth/mfa-verify'
-      preLoaderRoute: typeof AuthAuthMfaVerifyIndexRouteImport
-      parentRoute: typeof AuthRouteRoute
-    }
-    '/_auth/auth/mfa-setup/': {
-      id: '/_auth/auth/mfa-setup/'
-      path: '/auth/mfa-setup'
-      fullPath: '/auth/mfa-setup'
-      preLoaderRoute: typeof AuthAuthMfaSetupIndexRouteImport
-      parentRoute: typeof AuthRouteRoute
-    }
-    '/_auth/auth/login/': {
-      id: '/_auth/auth/login/'
-      path: '/auth/login'
-      fullPath: '/auth/login'
+    '/_auth/_auth/login/': {
+      id: '/_auth/_auth/login/'
+      path: '/login'
+      fullPath: '/login'
       preLoaderRoute: typeof AuthAuthLoginIndexRouteImport
-      parentRoute: typeof AuthRouteRoute
-    }
-    '/_auth/auth/forgot-password/': {
-      id: '/_auth/auth/forgot-password/'
-      path: '/auth/forgot-password'
-      fullPath: '/auth/forgot-password'
-      preLoaderRoute: typeof AuthAuthForgotPasswordIndexRouteImport
       parentRoute: typeof AuthRouteRoute
     }
   }
 }
 
 interface AuthRouteRouteChildren {
-  AuthAuthForgotPasswordIndexRoute: typeof AuthAuthForgotPasswordIndexRoute
+  AuthForgotPasswordIndexRoute: typeof AuthForgotPasswordIndexRoute
+  AuthMfaSetupIndexRoute: typeof AuthMfaSetupIndexRoute
+  AuthMfaVerifyIndexRoute: typeof AuthMfaVerifyIndexRoute
+  AuthRecoveryCodesIndexRoute: typeof AuthRecoveryCodesIndexRoute
+  AuthSignupIndexRoute: typeof AuthSignupIndexRoute
+  AuthVerifyEmailIndexRoute: typeof AuthVerifyEmailIndexRoute
   AuthAuthLoginIndexRoute: typeof AuthAuthLoginIndexRoute
-  AuthAuthMfaSetupIndexRoute: typeof AuthAuthMfaSetupIndexRoute
-  AuthAuthMfaVerifyIndexRoute: typeof AuthAuthMfaVerifyIndexRoute
-  AuthAuthRecoveryCodesIndexRoute: typeof AuthAuthRecoveryCodesIndexRoute
-  AuthAuthSignupIndexRoute: typeof AuthAuthSignupIndexRoute
-  AuthAuthVerifyEmailIndexRoute: typeof AuthAuthVerifyEmailIndexRoute
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
-  AuthAuthForgotPasswordIndexRoute: AuthAuthForgotPasswordIndexRoute,
+  AuthForgotPasswordIndexRoute: AuthForgotPasswordIndexRoute,
+  AuthMfaSetupIndexRoute: AuthMfaSetupIndexRoute,
+  AuthMfaVerifyIndexRoute: AuthMfaVerifyIndexRoute,
+  AuthRecoveryCodesIndexRoute: AuthRecoveryCodesIndexRoute,
+  AuthSignupIndexRoute: AuthSignupIndexRoute,
+  AuthVerifyEmailIndexRoute: AuthVerifyEmailIndexRoute,
   AuthAuthLoginIndexRoute: AuthAuthLoginIndexRoute,
-  AuthAuthMfaSetupIndexRoute: AuthAuthMfaSetupIndexRoute,
-  AuthAuthMfaVerifyIndexRoute: AuthAuthMfaVerifyIndexRoute,
-  AuthAuthRecoveryCodesIndexRoute: AuthAuthRecoveryCodesIndexRoute,
-  AuthAuthSignupIndexRoute: AuthAuthSignupIndexRoute,
-  AuthAuthVerifyEmailIndexRoute: AuthAuthVerifyEmailIndexRoute,
 }
 
 const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(

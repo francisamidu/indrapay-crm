@@ -5,7 +5,7 @@ interface CaseNote {
   timestamp: string;
   type: "note" | "action" | "system";
 }
-export interface Customer {
+export interface ComplianceCustomer {
   id: string;
   name: string;
   email: string;

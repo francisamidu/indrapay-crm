@@ -5,6 +5,6 @@ function RouteComponent() {
   return <Corridors />;
 }
 
-export const Route = createFileRoute("/(dashboard)/corridors/")({
+export const Route = createFileRoute("/_dashboard/dashboard/corridors/")({
   component: RouteComponent,
 });

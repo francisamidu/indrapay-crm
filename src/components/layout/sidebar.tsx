@@ -1,20 +1,20 @@
-import { cn } from "@/lib/utils";
-import { Link, useLocation } from "@tanstack/react-router";
-import { LogoIcon } from "../logo";
-
-import { Button } from "../ui/button";
-import { useMenuContext } from "@/contexts/menu-context";
-
-import { IconLayoutSidebar as SidebarIcon1 } from "@tabler/icons-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useMenuContext } from "@/contexts/menu-context";
+import { cn } from "@/lib/utils";
 import {
+  IconLayoutSidebar as SidebarIcon1,
   IconMoon as DarkIcon,
   IconSun as LightIcon,
 } from "@tabler/icons-react";
+import { Link, useLocation } from "@tanstack/react-router";
+
+import { LogoIcon } from "../logo";
+import { Button } from "../ui/button";
 
 export function Sidebar() {
   const pathname = useLocation().pathname;
   const { menuItems: navigation } = useMenuContext();
+  console.log("Sidebar navigation items:", navigation);
   return (
     <div className="w-64 !bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col h-full overflow-y-auto fixed top-0 left-0 z-20">
       <div className="flex flex-grow flex-col overflow-y-auto pt-5">

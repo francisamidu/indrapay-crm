@@ -4,6 +4,6 @@ import { createFileRoute } from "@tanstack/react-router";
 function RouteComponent() {
   return <UserWalletManagement />;
 }
-export const Route = createFileRoute("/(dashboard)/wallet-management/")({
+export const Route = createFileRoute("/_dashboard/dashboard/wallet-management/")({
   component: RouteComponent,
 });

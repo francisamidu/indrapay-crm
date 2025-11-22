@@ -4,6 +4,6 @@ import { createFileRoute } from "@tanstack/react-router";
 function RouteComponent() {
   return <Compliance />;
 }
-export const Route = createFileRoute("/(dashboard)/compliance/")({
+export const Route = createFileRoute("/_dashboard/dashboard/compliance/")({
   component: RouteComponent,
 });

@@ -1,30 +1,31 @@
+import ky, { type KyInstance, type Options } from "ky";
+
 import type { BaseApiResponse, PaginatedResponse } from "@/types";
 import type {
+  ChangePasswordRequest,
+  CrmUser,
   LoginRequest,
   LoginResponse,
   RefreshTokenRequest,
-  CrmUser,
-  ChangePasswordRequest,
 } from "@/types/auth";
-import type { BusinessSearchParams, Business } from "@/types/business";
-import type { CaseSearchParams, Case, CreateCaseRequest } from "@/types/case";
-import type { Customer } from "@/types/compliance";
+import type { Business, BusinessSearchParams } from "@/types/business";
+import type { Case, CaseSearchParams, CreateCaseRequest } from "@/types/case";
+import type { ComplianceCustomer as Customer } from "@/types/compliance";
 import type {
-  CorridorSearchParams,
   Corridor,
+  CorridorSearchParams,
   CreateCorridorRequest,
 } from "@/types/corridors";
 import type { CustomerSearchParams } from "@/types/customer";
 import type { DashboardKPIs } from "@/types/dashboard";
 import { ApiError } from "@/types/error";
-import type { Partner, CreatePartnerRequest } from "@/types/partners";
+import type { CreatePartnerRequest, Partner } from "@/types/partners";
 import type {
-  TransactionSearchParams,
-  Transaction,
   RefundRequest,
+  Transaction,
+  TransactionSearchParams,
 } from "@/types/transactions";
 import type { Wallet } from "@/types/wallet";
-import ky, { type KyInstance, type Options } from "ky";
 
 interface ApiClientConfig {
   baseUrl: string;
@@ -95,6 +96,7 @@ class ApiClient {
       if (error instanceof ApiError) {
         throw error;
       }
+      console.log(error);
       throw new ApiError(
         500,
         "NETWORK_ERROR",
@@ -1166,3 +1168,4 @@ export class IndraPayCrmApi {
     return this.client.getAccessToken();
   }
 }
+export type ApiClientType = InstanceType<typeof IndraPayCrmApi>;

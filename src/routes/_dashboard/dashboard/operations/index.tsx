@@ -1,7 +1,7 @@
 import { OperationsTools } from "@/components/dashboard/operations/operations";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/(dashboard)/operations/")({
+export const Route = createFileRoute("/_dashboard/dashboard/operations/")({
   component: RouteComponent,
 });
 

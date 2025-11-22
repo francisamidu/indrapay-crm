@@ -1,24 +1,23 @@
 "use client";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import React, { createContext, useContext, useState } from "react";
 
-import type { ReactNode, Dispatch, SetStateAction } from "react";
-
 import {
-  IconLayout2 as DashboardIcon1,
-  IconLayout2Filled as DashboardIcon2,
-  IconUsers as UsersIcon,
-  IconUserFilled as UsersIcon2,
-  IconCurrencyDollar as TransactionsIcon,
-  IconReceiptDollarFilled as TransactionsIcon2,
   IconChartPie as ReportsIcon,
   IconChartPieFilled as ReportsIcon2,
   IconCopyCheck as ComplianceIcon1,
   IconCopyCheckFilled as ComplianceIcon2,
+  IconCurrencyDollar as TransactionsIcon,
+  IconLayout2 as DashboardIcon1,
+  IconLayout2Filled as DashboardIcon2,
+  IconReceiptDollarFilled as TransactionsIcon2,
   IconReceiptEuro as CorridorIcon1,
   IconReceiptEuroFilled as CorridorIcon2,
-  IconUsersGroup,
   IconSettings,
   IconSettingsFilled,
+  IconUserFilled as UsersIcon2,
+  IconUsers as UsersIcon,
+  IconUsersGroup,
 } from "@tabler/icons-react";
 
 interface MenuItem {
@@ -42,7 +41,7 @@ const MenuContext = createContext<MenuContextType | undefined>(undefined);
 const initialMenuItems: MenuItem[] = [
   {
     name: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: <DashboardIcon1 />,
     activeIcon: <DashboardIcon2 />,
   },
@@ -54,37 +53,37 @@ const initialMenuItems: MenuItem[] = [
   },
   {
     name: "Transactions",
-    href: "/transactions",
+    href: "/dashboard/transactions",
     icon: <TransactionsIcon />,
     activeIcon: <TransactionsIcon2 />,
   },
   {
     name: "Corridors",
-    href: "/corridors",
+    href: "/dashboard/corridors",
     icon: <CorridorIcon1 />,
     activeIcon: <CorridorIcon2 />,
   },
   {
     name: "Compliance",
-    href: "/compliance",
+    href: "/dashboard/compliance",
     icon: <ComplianceIcon1 />,
     activeIcon: <ComplianceIcon2 />,
   },
   {
     name: "Reports",
-    href: "/reports",
+    href: "/dashboard/reports",
     icon: <ReportsIcon />,
     activeIcon: <ReportsIcon2 />,
   },
   {
     name: "Partners",
-    href: "/partners",
+    href: "/dashboard/partners",
     icon: <IconUsersGroup />,
     activeIcon: <IconUsersGroup />,
   },
   {
     name: "Operations",
-    href: "/operations",
+    href: "/dashboard/operations",
     icon: <IconSettings />,
     activeIcon: <IconSettingsFilled />,
   },

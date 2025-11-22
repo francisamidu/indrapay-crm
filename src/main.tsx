@@ -1,17 +1,14 @@
 import "./index.css";
+
 import { StrictMode } from "react";
+
 import ReactDOM from "react-dom/client";
-import { RouterProvider, createRouter } from "@tanstack/react-router";
 
-// Import the generated route tree
-import { routeTree } from "./routeTree.gen";
-import { NotFoundPage } from "./components/layout/not-found";
+import { RouterProvider } from "@tanstack/react-router";
 
-// Create a new router instance
-const router = createRouter({
-  defaultNotFoundComponent: NotFoundPage,
-  routeTree,
-});
+import { getRouter } from "./router";
+
+const router = getRouter();
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {

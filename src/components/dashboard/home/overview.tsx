@@ -2,6 +2,12 @@
 
 import type React from "react";
 import { useState } from "react";
+
+import { Bar, BarChart, Cell, Pie, PieChart, XAxis } from "recharts";
+
+import { Alert as UIAlert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,40 +15,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert as UIAlert, AlertDescription } from "@/components/ui/alert";
 import {
-  IconSearch as Search,
-  IconCreditCard as CreditCard,
-  IconTrendingUp as TrendingUp,
-  IconAlertTriangle as AlertTriangle,
-  IconCircleCheck as CheckCircle,
-  IconCircleX as XCircle,
-  IconCurrencyDollar as DollarSign,
-  IconActivity as Activity,
-  IconWallet as Wallet,
-  IconFilter as Filter,
-  IconDotsCircleHorizontal as MoreHorizontal,
-} from "@tabler/icons-react";
-import type {
-  CorridorData,
-  DashboardAlert,
-  KPIData,
-  MonthlyVolumeData,
-  Transaction,
-} from "@/types/dashboard";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from "@/components/ui/chart";
-import { BarChart, XAxis, Bar, Cell, Pie, PieChart } from "recharts";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  IconActivity as Activity,
+  IconAlertTriangle as AlertTriangle,
+  IconCircleCheck as CheckCircle,
+  IconCircleX as XCircle,
+  IconCreditCard as CreditCard,
+  IconCurrencyDollar as DollarSign,
+  IconDotsCircleHorizontal as MoreHorizontal,
+  IconFilter as Filter,
+  IconTrendingUp as TrendingUp,
+  IconWallet as Wallet,
+} from "@tabler/icons-react";
+import { useLoaderData } from "@tanstack/react-router";
 
 const Overview: React.FC = () => {
-  const [alerts, _setAlerts] = useState<DashboardAlert[]>([
+  const [alerts, _setAlerts] = useState<any[]>([
     {
       id: "1",
       type: "error",
@@ -62,17 +57,20 @@ const Overview: React.FC = () => {
       timestamp: "1 hour ago",
     },
   ]);
-
+  const data = useLoaderData({
+    from: "/(dashboard)/",
+  });
+  console.log(data);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const [kpiData] = useState<KPIData>({
+  const [kpiData] = useState<any>({
     totalTransactions: 24567,
     activeWallets: 1847,
     successRate: 98.7,
     totalVolume: 2847392,
   });
 
-  const [recentTransactions] = useState<Transaction[]>([
+  const [recentTransactions] = useState<any[]>([
     {
       id: "TXN-8429",
       amount: 1250.0,
@@ -107,7 +105,7 @@ const Overview: React.FC = () => {
     },
   ]);
 
-  const [monthlyVolumeData] = useState<MonthlyVolumeData[]>([
+  const [monthlyVolumeData] = useState<any[]>([
     { month: "Jan", volume: 125000, transactions: 2450 },
     { month: "Feb", volume: 98000, transactions: 1890 },
     { month: "Mar", volume: 142000, transactions: 2780 },
@@ -118,7 +116,7 @@ const Overview: React.FC = () => {
     { month: "Aug", volume: 156000, transactions: 2980 },
   ]);
 
-  const [corridorData] = useState<CorridorData[]>([
+  const [corridorData] = useState<any[]>([
     { name: "USD-KES", transactions: 4200, volume: 1250000, color: "#3b82f6" },
     { name: "GBP-USD", transactions: 2800, volume: 835000, color: "#f59e0b" },
     { name: "EUR-JPY", transactions: 1800, volume: 537000, color: "#ec4899" },
