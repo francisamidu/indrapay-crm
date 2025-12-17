@@ -1,271 +1,257 @@
-# Indrapay CRM 🚀
+# IndraPay CRM
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#) [![Coverage](https://img.shields.io/badge/coverage-%E2%80%94%25-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-blue)](#) [![Issues](https://img.shields.io/badge/issues-open-yellow)](#)
+A comprehensive Customer Relationship Management system designed for payment platform operations, built with modern web technologies.
 
-> A unified operations & customer relationship platform for **Indrapay** — businesses, subscriptions, billing, support, communications, analytics and admin in one place.
+## 🚀 Overview
 
----
+IndraPay CRM is a full-featured dashboard for managing payment operations, customer relationships, compliance monitoring, and transaction processing. The system provides real-time insights into payment corridors, wallet management, compliance workflows, and partner integrations.
 
-## Table of contents
+## ✨ Features
 
-- [About](#about)
-- [Key features](#key-features)
-- [Architecture & file map](#architecture--file-map)
-- [Types & Validation (Zod)](#types--validation-zod)
-- [API examples](#api-examples)
-- [RBAC & Security](#rbac--security)
-- [Developer setup](#developer-setup)
-- [Testing & QA](#testing--qa)
-- [Deployment](#deployment)
-- [Monitoring & Metrics](#monitoring--metrics)
-- [Contributing](#contributing)
-- [License & Contact](#license--contact)
+### 🏠 **Dashboard & Analytics**
+- Real-time KPI monitoring (transactions, wallets, success rates, volume)
+- Interactive charts for transaction volume and corridor performance
+- Recent activity tracking and alerts system
 
----
+### 👥 **Customer Management**
+- Comprehensive customer profiles and wallet management
+- KYC/AML compliance workflows
+- Risk scoring and monitoring
+- Transaction history and account management
 
-## About
+### 💳 **Transaction Operations**
+- Real-time transaction monitoring
+- Transaction search and filtering
+- Refund and reversal capabilities
+- Bulk payout processing
 
-**Indrapay CRM** centralizes the operational needs of Indrapay teams — Ops, Finance, Support, and Admin — offering a 360° business view, subscription & billing workflows, SLA-backed support, templated communications, analytics, and audit-first compliance.
+### 🌐 **Corridor Management**
+- Payment corridor configuration and monitoring
+- Exchange rate management
+- Fee structure configuration
+- Performance analytics by corridor
 
-This repository contains the frontend codebase (React + TypeScript) and shared types/validation (Zod) used by the UI to interact with the backend APIs.
+### 🛡️ **Compliance & Security**
+- Automated compliance checks
+- Case management system
+- Document verification workflows
+- Audit logging and reporting
 
----
+### 🤝 **Partner Management**
+- Partner onboarding and management
+- Settlement tracking and reporting
+- API key management for integrations
+- Performance monitoring
 
-## Key features
+### ⚙️ **Operations Tools**
+- Manual transaction processing
+- Wallet management tools
+- Support ticket system
+- Bulk operations
 
-- Dashboard with KPI cards, trends, and activity feed  
-- Business management: create/edit, profile, subscriptions, notes  
-- Subscriptions & billing: plan assignment, trial handling, proration preview  
-- Support & tickets: SLA timers, escalation rules, threaded comments  
-- Communication: templated Email/SMS with delivery logs  
-- Analytics & insights: aggregated metrics + CSV exports  
-- Admin & settings: users, roles, audit logs, system configuration  
-- Documents & billing (planned): signed URL uploads, invoice library  
-- Data import/export wizard with validation and job monitor  
-- Alerts & notifications center
+## 🛠️ Technology Stack
 
----
+### Frontend
+- **React 19** with TypeScript
+- **Vite** for build tooling
+- **TanStack Router** for routing
+- **TanStack Query** for data fetching
+- **shadcn/ui** for UI components
+- **Tailwind CSS** for styling
+- **Recharts** for data visualization
 
-## Architecture & file map
+### Backend Integration
+- **TypeScript API client** with full type safety
+- **Ky** for HTTP requests
+- **Error handling** with custom API error classes
 
-High-level stack:
-- Frontend: **React + TypeScript**
-- Validation: **Zod**
-- Backend: RESTful API (Node/NestJS or Express)
-- DB: PostgreSQL (recommended)
-- Integrations: Stripe, Twilio, SES, object storage (S3)
+### Database
+- **Prisma** ORM with PostgreSQL
+- Structured database schema for financial operations
 
-Suggested frontend repository layout (snapshot):
+### Development Tools
+- **ESLint** for code quality
+- **Prettier** for code formatting
+- **TypeScript** strict configuration
+
+## 📁 Project Structure
 
 ```
-src/
- ├── api/              # API handlers & reusable API clients
- ├── components/       # Reusable UI components (tables, forms, cards)
- ├── pages/            # Route pages (Dashboard, Businesses, Support, etc.)
- ├── services/         # Business service layer calling api/*
- ├── store/            # App state (Redux / Zustand)
- ├── hooks/            # Custom React hooks
- ├── utils/            # Helpers (formatters, validators)
- ├── types/            # Zod + TypeScript schemas (see below)
- │    ├── apiEnvelope.ts
- │    ├── auth.ts
- │    ├── common.ts
- │    ├── fees.ts
- │    ├── forex.ts
- │    ├── ledger.ts
- │    ├── wallet.ts
- │    └── index.ts
- ├── config/           # Env and feature flags
- └── README.md
+francisamidu-indrapay-crm/
+├── src/
+│   ├── api/              # API client and services
+│   ├── components/       # React components
+│   │   ├── auth/        # Authentication components
+│   │   ├── dashboard/   # Dashboard feature components
+│   │   ├── layout/      # Layout components
+│   │   ├── notifications/# Notification components
+│   │   └── ui/          # Reusable UI components (shadcn/ui)
+│   ├── contexts/        # React contexts
+│   ├── lib/            # Utility functions
+│   ├── providers/      # React providers (Query, etc.)
+│   ├── routes/         # TanStack Router routes
+│   ├── shared/         # Shared data and constants
+│   └── types/          # TypeScript type definitions
+├── schema.prisma       # Database schema
+└── indrapay_crm_integration.ts # Core API integration
 ```
 
-
-
----
-
-## Types & Validation (Zod)
-
-All API request/response types and runtime validators live in `src/types/` (Zod schemas + `z.infer<>` TypeScript types). This enables:
-
-- Compile-time typing for components and API calls
-- Runtime validation of inputs and server responses
-- Consistent contract between frontend and backend
-
-Example usage:
-
-```ts
-// src/services/walletService.ts
-import axios from 'axios';
-import { CreateWalletRequestSchema, CreateWalletResponseSchema } from 'src/types/wallet';
-
-const API = axios.create({ baseURL: process.env.API_BASE_URL });
-
-export async function createWallet(payload: unknown) {
-  const request = CreateWalletRequestSchema.parse(payload);
-  const res = await API.post('/v1/wallets', request);
-  const parsed = CreateWalletResponseSchema.safeParse(res.data);
-  if (!parsed.success) throw new Error('Unexpected response shape from server');
-  return parsed.data;
-}
-```
-
-**Why Zod?**
-- Lightweight and expressive runtime validation.
-- Easy `z.infer<>` for TypeScript types.
-- Great for validating both request payloads and server responses.
-
----
-
-## API examples
-
-> All endpoints are prefixed with `/v1`.
-
-### Dashboard summary
-```http
-GET /v1/dashboard/summary
-Response: ApiEnvelope<{ totalBusinesses: number; mrr: number; trends: any }>
-```
-
-### Create business
-```http
-POST /v1/businesses
-Body: { name: string, email?: string, planId?: string, ... }
-```
-
-### Create support ticket
-```http
-POST /v1/support/tickets
-Body: { businessId: string, subject: string, message: string, priority?: 'low'|'medium'|'high' }
-```
-
-### Assign subscription
-```http
-POST /v1/subscriptions/{businessId}/assign
-Body: { planId: string, startAt?: string, trial?: boolean }
-```
-
-Use the Zod schemas in `src/types/*` to validate both requests and responses on the frontend.
-
----
-
-## RBAC & Security
-
-| Role | Access Summary |
-|------|----------------|
-| **Superadmin** | system-wide settings & role creation |
-| **Admin** | full access to all features |
-| **Finance** | billing & analytics |
-| **Support** | tickets & customer contact flows |
-| **Viewer** | read-only access |
-
-Security principles:
-- Audit-first: every write action produces an `audit_log` entry with `actor_id`, `reason`, and timestamp.
-- Field-level RBAC for sensitive fields (e.g., MRR visible only to Finance/Admin).
-- Enforce backend server-side RBAC — never trust the client.
-- Password strength + optional MFA flows enforced at auth layer.
-- PII redaction for exports and signed URLs for document access.
-
----
-
-## Developer setup
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js v18+
-- pnpm / npm / yarn
-- PostgreSQL (local) or remote DB
-- `.env` configuration
+- Node.js 18+ 
+- npm or yarn
+- PostgreSQL database
 
 ### Installation
+
+1. **Clone the repository**
 ```bash
-git clone git@github.com:indrapay/indrapay-crm.git
-cd indrapay-crm
+git clone <repository-url>
+cd francisamidu-indrapay-crm
+```
+
+2. **Install dependencies**
+```bash
 npm install
-cp .env.example .env
-npm run dev
+# or
+yarn install
 ```
 
-### Common npm scripts
-- `npm run dev` — start dev server
-- `npm run build` — production build
-- `npm run test` — run tests
-- `npm run lint` — linting
-
-### Environment variables
-```
-API_BASE_URL=http://localhost:4000
-AUTH_PROVIDER_URL=http://localhost:4000/auth
-STRIPE_PUBLIC_KEY=pk_test_xxx
-MAIL_SENDER_ID=no-reply@indrapay.com
-DEFAULT_TIMEZONE=Africa/Blantyre
-FEATURE_FLAGS_ENABLE_AI=false
+3. **Configure environment variables**
+Create a `.env` file in the root directory:
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/indrapay_crm"
+VITE_API_URL="http://localhost:4000"
 ```
 
----
-
-## Testing & QA
-
-- Unit tests: Zod schema validation & utilities
-- Integration tests: API clients + mocks
-- E2E tests: Cypress for primary flows (create business, ticket lifecycle)
-- Performance: Analytics queries < 2s (cached)
-- Edge-case tests: SLA escalations, webhook retries, duplicate-ticket prevention
-
----
-
-## Deployment
-
-Recommended CI/CD:
-1. PR → CI tests & lint (GitHub Actions)
-2. Merge → build artifact + Docker image
-3. Auto-deploy (Cloud Run / ECS / Kubernetes / EC2)
-
-Commands:
+4. **Set up the database**
 ```bash
-npm run build
-docker build -t indrapay-crm:${GITHUB_SHA} .
+npx prisma generate
+npx prisma db push
 ```
 
-Feature flags control optional modules (email provider, AI, docs upload).
+5. **Start the development server**
+```bash
+npm run dev
+# or
+yarn dev
+```
 
----
+The application will be available at `http://localhost:5173`
 
-## Monitoring & Metrics
+## 📦 Available Scripts
 
-Track key metrics:
-- API latency and error rates
-- Dashboard cache hit rate
-- Ticket resolution times
-- Subscription churn & MRR trends
-- Alert frequency and acknowledgement time
-- Export/import job success rates
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-Suggested stack: Prometheus + Grafana, Sentry, Datadog.
+## 🔧 API Integration
 
----
+The project includes a comprehensive API client for CRM operations:
 
-## Contributing
+### Services Available
+- **AuthService**: User authentication and session management
+- **CustomerService**: Customer account management
+- **TransactionService**: Transaction operations and monitoring
+- **CorridorService**: Payment corridor management
+- **CaseService**: Support case management
+- **PartnerService**: Partner organization management
+- **BusinessService**: Business account management
+- **DashboardService**: Analytics and KPI data
 
-1. Fork this repo
-2. Create a branch: `git checkout -b feat/your-feature`
-3. Write tests & update types
-4. Open a PR referencing related feature mapping or issue
-5. Await review for code quality and acceptance criteria
+### Example Usage
+```typescript
+import { IndraPayCrmApi } from './api/client';
 
-Follow `CODE_OF_CONDUCT.md` and `CONTRIBUTING.md` guidelines.
+const crmApi = new IndraPayCrmApi({
+  baseUrl: import.meta.env.VITE_API_URL,
+});
 
----
+// Login
+const { accessToken } = await crmApi.auth.login({
+  username: 'admin@indrapay.com',
+  password: 'password123',
+});
 
-## License & Contact
+// Search customers
+const customers = await crmApi.customers.searchCustomers({
+  kycStatus: 'PENDING',
+  page: 1,
+  limit: 20,
+});
+```
 
-**License:** MIT  
-**Contact:** platform@indrapay.com
+## 🎨 Styling & Theming
 
-For integration help or schema updates, open an issue or email the core platform team.
+The project uses **Tailwind CSS** with a custom design system:
+- Custom color palette with primary (`#14748b`) and secondary (`#125e8a`) colors
+- Dark mode support
+- Custom scrollbars and component styling
+- Responsive design throughout
 
----
+## 🔐 Authentication Flow
 
-### Appendix: Quick links
+The application implements a secure authentication system:
+- Email/password login
+- Google OAuth integration
+- Multi-factor authentication (MFA) setup
+- Password recovery
+- Session management with JWT tokens
 
-- `docs/Indrapay Page & Feature Mapping.md` — Product → UI → API mapping
-- `src/types/` — Zod schemas & inferred TS types (import from `src/types/index.ts`)
+## 📱 Dashboard Modules
 
+1. **Home/Overview**: High-level metrics and recent activity
+2. **Compliance**: KYC/AML workflows and case management
+3. **Corridors**: Payment corridor configuration and monitoring
+4. **Operations**: Manual transaction processing and support tools
+5. **Partners**: Partner organization management
+6. **Reports**: Analytics and reporting
+7. **Transactions**: Transaction monitoring and management
+8. **Wallet Management**: Customer wallet administration
+
+## 🗄️ Database Schema
+
+The Prisma schema includes models for:
+- User accounts and profiles
+- Wallet and ledger management
+- Transaction records
+- Compliance cases and disputes
+- Partner configurations
+- API key management
+- Country and limit configurations
+
+## 🧪 Testing
+
+The project is configured with:
+- TypeScript strict mode
+- ESLint for code quality
+- Prettier for code formatting
+- TanStack Router type-safe routing
+
+## 📈 Performance Optimizations
+
+- Code splitting with TanStack Router
+- React Query for efficient data fetching
+- Optimized re-renders with proper React patterns
+- Tailwind CSS for minimal CSS bundle size
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run linting and tests
+5. Submit a pull request
+
+## 📄 License
+
+This project is proprietary software. All rights reserved.
+
+## 📞 Support
+
+For technical support or questions:
+- Check the project documentation
+- Review the TypeScript type definitions
+- Examine the example components for implementation patterns
