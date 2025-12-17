@@ -1,10 +1,9 @@
-"use client";
-
 import type React from "react";
-import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useEffect, useMemo, useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -20,22 +19,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { apiClient } from "@/router";
+import type { Corridor } from "@/types/corridors";
 import {
+  IconActivity as Activity,
+  IconArrowRight as ArrowRight,
   IconCheck as CheckCircle,
   IconCircle as XCircle,
-  IconActivity as Activity,
-  IconFilter as Filter,
   IconDots as MoreHorizontal,
   IconDownload as Download,
-  IconRefresh as RefreshCw,
-  IconEye as Eye,
   IconEdit as Edit,
+  IconEye as Eye,
+  IconFilter as Filter,
   IconPlus as Plus,
-  IconArrowRight as ArrowRight,
+  IconRefresh as RefreshCw,
 } from "@tabler/icons-react";
-import type { Corridor, CorridorKPIs } from "@/types/corridors";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
 
 const CorridorManagement: React.FC<{
   onNavigate?: (page: string) => void;
@@ -49,6 +50,12 @@ const CorridorManagement: React.FC<{
     null
   );
 
+  const { data: corridorData } = useQuery({
+    queryKey: ["corridors"],
+    queryFn: () => apiClient.corridors.getCorridors(),
+  });
+  console.log(corridorData);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -57,7 +64,7 @@ const CorridorManagement: React.FC<{
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const [kpiData] = useState<CorridorKPIs>({
+  const [kpiData] = useState<any>({
     totalCorridors: { count: 24, change: 8.3 },
     activeCorridors: { count: 22, change: 4.5 },
     totalVolume: { amount: 12847392, change: 15.2 },
@@ -68,88 +75,94 @@ const CorridorManagement: React.FC<{
   const [corridors] = useState<Corridor[]>([
     {
       id: "COR-USD-KES-001",
-      name: "USD to KES",
-      fromCountry: "United States",
-      toCountry: "Kenya",
-      fromCurrency: "USD",
-      toCurrency: "KES",
-      status: "active",
-      feeType: "percentage",
-      feeValue: 2.5,
-      exchangeRate: 150.75,
-      rateSource: "provider",
-      volume24h: 2847392,
-      successRate: 98.5,
-      transactionCount: 1247,
-      lastUpdated: "2024-01-15T10:30:00Z",
+      sourceCurrency: "USD",
+      targetCurrency: "KES",
+      targetCountry: "Kenya",
+      baseRate: 150.75,
+      markup: 2.5,
+      percentageFee: 2.5,
+      minAmount: 10,
+      maxAmount: 10000,
+      dailyLimit: 50000,
+      monthlyLimit: 200000,
+      riskLevel: "LOW",
+      requiresApproval: false,
+      status: "ACTIVE",
+      metadata: { provider: "Provider A" },
+      createdAt: "2024-01-01T10:00:00Z",
+      updatedAt: "2024-01-15T10:30:00Z",
     },
     {
       id: "COR-GBP-EUR-002",
-      name: "GBP to EUR",
-      fromCountry: "United Kingdom",
-      toCountry: "European Union",
-      fromCurrency: "GBP",
-      toCurrency: "EUR",
-      status: "active",
-      feeType: "fixed",
-      feeValue: 5.0,
-      exchangeRate: 1.17,
-      rateSource: "provider",
-      volume24h: 1956780,
-      successRate: 99.2,
-      transactionCount: 892,
-      lastUpdated: "2024-01-15T09:45:00Z",
+      sourceCurrency: "GBP",
+      targetCurrency: "EUR",
+      targetCountry: "European Union",
+      baseRate: 1.17,
+      markup: 1.5,
+      fixedFee: 5.0,
+      minAmount: 20,
+      maxAmount: 8000,
+      dailyLimit: 40000,
+      monthlyLimit: 150000,
+      riskLevel: "MEDIUM",
+      requiresApproval: true,
+      status: "ACTIVE",
+      metadata: { provider: "Provider B" },
+      createdAt: "2024-01-02T09:00:00Z",
+      updatedAt: "2024-01-15T09:45:00Z",
     },
     {
       id: "COR-USD-UGX-003",
-      name: "USD to UGX",
-      fromCountry: "United States",
-      toCountry: "Uganda",
-      fromCurrency: "USD",
-      toCurrency: "UGX",
-      status: "maintenance",
-      feeType: "percentage",
-      feeValue: 3.0,
-      exchangeRate: 3750.25,
-      rateSource: "manual",
-      volume24h: 456780,
-      successRate: 95.8,
-      transactionCount: 234,
-      lastUpdated: "2024-01-15T08:20:00Z",
+      sourceCurrency: "USD",
+      targetCurrency: "UGX",
+      targetCountry: "Uganda",
+      baseRate: 3750.25,
+      markup: 3.0,
+      percentageFee: 3.0,
+      minAmount: 50,
+      maxAmount: 5000,
+      riskLevel: "HIGH",
+      requiresApproval: true,
+      status: "SUSPENDED",
+      metadata: { provider: "Manual Entry" },
+      createdAt: "2024-01-03T08:00:00Z",
+      updatedAt: "2024-01-15T08:20:00Z",
     },
     {
       id: "COR-EUR-CAD-004",
-      name: "EUR to CAD",
-      fromCountry: "European Union",
-      toCountry: "Canada",
-      fromCurrency: "EUR",
-      toCurrency: "CAD",
-      status: "active",
-      feeType: "percentage",
-      feeValue: 2.0,
-      exchangeRate: 1.45,
-      rateSource: "provider",
-      volume24h: 1234567,
-      successRate: 97.3,
-      transactionCount: 567,
-      lastUpdated: "2024-01-15T07:15:00Z",
+      sourceCurrency: "EUR",
+      targetCurrency: "CAD",
+      targetCountry: "Canada",
+      baseRate: 1.45,
+      markup: 2.0,
+      percentageFee: 2.0,
+      minAmount: 15,
+      maxAmount: 7000,
+      dailyLimit: 30000,
+      monthlyLimit: 120000,
+      riskLevel: "LOW",
+      requiresApproval: false,
+      status: "ACTIVE",
+      metadata: { provider: "Provider C" },
+      createdAt: "2024-01-04T07:00:00Z",
+      updatedAt: "2024-01-15T07:15:00Z",
     },
     {
       id: "COR-AUD-NZD-005",
-      name: "AUD to NZD",
-      fromCountry: "Australia",
-      toCountry: "New Zealand",
-      fromCurrency: "AUD",
-      toCurrency: "NZD",
-      status: "inactive",
-      feeType: "fixed",
-      feeValue: 8.0,
-      exchangeRate: 1.08,
-      rateSource: "manual",
-      volume24h: 89456,
-      successRate: 94.2,
-      transactionCount: 45,
-      lastUpdated: "2024-01-14T16:30:00Z",
+      sourceCurrency: "AUD",
+      targetCurrency: "NZD",
+      targetCountry: "New Zealand",
+      baseRate: 1.08,
+      markup: 1.8,
+      fixedFee: 8.0,
+      minAmount: 25,
+      maxAmount: 6000,
+      riskLevel: "MEDIUM",
+      requiresApproval: true,
+      status: "INACTIVE",
+      metadata: { provider: "Manual Entry" },
+      createdAt: "2024-01-05T16:00:00Z",
+      updatedAt: "2024-01-14T16:30:00Z",
     },
   ]);
 
@@ -157,31 +170,21 @@ const CorridorManagement: React.FC<{
     return corridors.filter((corridor) => {
       const matchesSearch =
         debouncedSearch === "" ||
-        corridor.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         corridor.id.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        corridor.fromCountry
+        corridor.sourceCurrency
           .toLowerCase()
           .includes(debouncedSearch.toLowerCase()) ||
-        corridor.toCountry
+        corridor.targetCountry
           .toLowerCase()
           .includes(debouncedSearch.toLowerCase()) ||
-        corridor.fromCurrency
-          .toLowerCase()
-          .includes(debouncedSearch.toLowerCase()) ||
-        corridor.toCurrency
+        corridor.targetCurrency
           .toLowerCase()
           .includes(debouncedSearch.toLowerCase());
 
       const matchesStatus =
         statusFilter === "all" || corridor.status === statusFilter;
-      const matchesRegion =
-        regionFilter === "all" ||
-        corridor.fromCountry
-          .toLowerCase()
-          .includes(regionFilter.toLowerCase()) ||
-        corridor.toCountry.toLowerCase().includes(regionFilter.toLowerCase());
 
-      return matchesSearch && matchesStatus && matchesRegion;
+      return matchesSearch && matchesStatus;
     });
   }, [corridors, debouncedSearch, statusFilter, regionFilter]);
 
@@ -359,7 +362,7 @@ const CorridorManagement: React.FC<{
                   FEES
                 </span>
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider w-32">
-                  LAST UPDATED
+                  RISK LEVEL
                 </span>
                 <div className="w-20"></div>
               </div>
@@ -383,16 +386,16 @@ const CorridorManagement: React.FC<{
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-md">
                       <span className="text-sm font-semibold text-card-foreground">
-                        {corridor.fromCurrency}
+                        {corridor.sourceCurrency}
                       </span>
                       <ArrowRight className="h-3 w-3 text-muted-foreground" />
                       <span className="text-sm font-semibold text-card-foreground">
-                        {corridor.toCurrency}
+                        {corridor.targetCurrency}
                       </span>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-card-foreground">
-                        {corridor.name}
+                        {`${corridor.sourceCurrency} to ${corridor.targetCurrency} in ${corridor.targetCountry}`}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {corridor.id}
@@ -414,39 +417,33 @@ const CorridorManagement: React.FC<{
                 {/* Volume Column */}
                 <div className="w-32">
                   <p className="text-sm font-semibold text-card-foreground">
-                    {formatCurrency(corridor.volume24h)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {corridor.transactionCount} transactions
+                    {formatCurrency(corridor.dailyLimit || 0)}
                   </p>
                 </div>
 
                 {/* Success Rate Column */}
                 <div className="w-32">
                   <p className="text-sm font-semibold text-card-foreground">
-                    {corridor.successRate}%
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Rate: {corridor.exchangeRate} ({corridor.rateSource})
+                    {corridor.baseRate}%
                   </p>
                 </div>
 
                 {/* Fees Column */}
                 <div className="w-24">
                   <p className="text-sm font-semibold text-card-foreground">
-                    {corridor.feeType === "percentage"
-                      ? `${corridor.feeValue}%`
-                      : formatCurrency(corridor.feeValue)}
+                    {formatCurrency(
+                      corridor.percentageFee || corridor.fixedFee || 0
+                    )}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {corridor.feeType}
+                    percentage / fixed
                   </p>
                 </div>
 
                 {/* Last Updated Column */}
                 <div className="w-32">
                   <p className="text-sm text-card-foreground">
-                    {formatDateTime(corridor.lastUpdated)}
+                    {corridor.riskLevel}
                   </p>
                 </div>
 
@@ -468,7 +465,7 @@ const CorridorManagement: React.FC<{
                         <DialogTitle>Corridor Configuration</DialogTitle>
                         <DialogDescription>
                           Configure fees, exchange rates, and monitor
-                          performance for {corridor.name}
+                          performance for {selectedCorridor?.id}
                         </DialogDescription>
                       </DialogHeader>
                       {selectedCorridor && (
@@ -477,19 +474,19 @@ const CorridorManagement: React.FC<{
                             <div>
                               <h4 className="font-medium mb-2">From</h4>
                               <p className="text-sm">
-                                {selectedCorridor.fromCountry}
+                                {selectedCorridor.sourceCurrency}
                               </p>
                               <p className="text-lg font-bold">
-                                {selectedCorridor.fromCurrency}
+                                {selectedCorridor.sourceCurrency}
                               </p>
                             </div>
                             <div>
                               <h4 className="font-medium mb-2">To</h4>
                               <p className="text-sm">
-                                {selectedCorridor.toCountry}
+                                {selectedCorridor.targetCurrency}
                               </p>
                               <p className="text-lg font-bold">
-                                {selectedCorridor.toCurrency}
+                                {selectedCorridor.targetCurrency}
                               </p>
                             </div>
                           </div>
@@ -500,10 +497,10 @@ const CorridorManagement: React.FC<{
                                 Exchange Rate
                               </h4>
                               <p className="text-lg font-bold">
-                                {selectedCorridor.exchangeRate}
+                                {selectedCorridor.baseRate}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                Source: {selectedCorridor.rateSource}
+                                Source: {selectedCorridor.id}
                               </p>
                             </div>
                             <div>
@@ -511,18 +508,22 @@ const CorridorManagement: React.FC<{
                                 Fee Structure
                               </h4>
                               <p className="text-lg font-bold">
-                                {selectedCorridor.feeType === "percentage"
-                                  ? `${selectedCorridor.feeValue}%`
-                                  : formatCurrency(selectedCorridor.feeValue)}
+                                {formatCurrency(
+                                  selectedCorridor.percentageFee ||
+                                    selectedCorridor.fixedFee ||
+                                    0
+                                )}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {selectedCorridor.feeType}
+                                {selectedCorridor.percentageFee
+                                  ? "Percentage Fee"
+                                  : "Fixed Fee"}
                               </p>
                             </div>
                             <div>
-                              <h4 className="font-medium mb-2">Success Rate</h4>
-                              <p className="text-lg font-bold">
-                                {selectedCorridor.successRate}%
+                              <h4 className="font-medium mb-2">Risk Rate</h4>
+                              <p className="text-lg font-bold capitalize">
+                                {selectedCorridor.riskLevel}%
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 24h performance
@@ -541,7 +542,7 @@ const CorridorManagement: React.FC<{
                               </Badge>
                               <span className="text-sm text-muted-foreground">
                                 Last updated:{" "}
-                                {formatDateTime(selectedCorridor.lastUpdated)}
+                                {formatDateTime(new Date().toISOString())}
                               </span>
                             </div>
 
@@ -584,10 +585,10 @@ const CorridorManagement: React.FC<{
                       <DropdownMenuItem>Update Exchange Rate</DropdownMenuItem>
                       <DropdownMenuItem>Modify Fees</DropdownMenuItem>
                       <DropdownMenuItem>View Analytics</DropdownMenuItem>
-                      {corridor.status === "inactive" && (
+                      {corridor.status === "INACTIVE" && (
                         <DropdownMenuItem>Activate Corridor</DropdownMenuItem>
                       )}
-                      {corridor.status === "active" && (
+                      {corridor.status === "ACTIVE" && (
                         <DropdownMenuItem>Deactivate Corridor</DropdownMenuItem>
                       )}
                     </DropdownMenuContent>

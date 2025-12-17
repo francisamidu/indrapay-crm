@@ -4,6 +4,7 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import type { ApiClientType } from "@/api/client";
 import ErrorState from "@/components/layout/error-state";
+import { Toaster } from "@/components/ui/sonner";
 import { MenuContextProvider } from "@/contexts/menu-context";
 import QueryProvider from "@/providers/query-provider";
 import type { User } from "@/types";
@@ -23,6 +24,7 @@ function RootComponent() {
   return (
     <React.Fragment>
       <QueryProvider>
+        <Toaster />
         <QueryErrorResetBoundary>
           {({ reset }) => (
             <ErrorBoundary

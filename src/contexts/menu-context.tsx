@@ -47,7 +47,7 @@ const initialMenuItems: MenuItem[] = [
   },
   {
     name: "Wallet Management",
-    href: "/wallet-management",
+    href: "/dashboard/wallet-management",
     icon: <UsersIcon />,
     activeIcon: <UsersIcon2 />,
   },

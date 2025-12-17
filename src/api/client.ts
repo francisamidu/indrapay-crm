@@ -1,5 +1,8 @@
 import ky, { type KyInstance, type Options } from "ky";
+import { CookieJar } from "tough-cookie";
 
+import { storage } from "@/lib/storage";
+import { generateHeaders } from "@/lib/utils";
 import type { BaseApiResponse, PaginatedResponse } from "@/types";
 import type {
   ChangePasswordRequest,
@@ -27,13 +30,14 @@ import type {
 } from "@/types/transactions";
 import type { Wallet } from "@/types/wallet";
 
+const cookieJar = new CookieJar();
+
 interface ApiClientConfig {
   baseUrl: string;
   timeout?: number;
   retryLimit?: number;
   headers?: Record<string, string>;
 }
-
 class ApiClient {
   private client: KyInstance;
   private accessToken: string | null = null;
@@ -41,6 +45,8 @@ class ApiClient {
   constructor(config: ApiClientConfig) {
     this.client = ky.create({
       prefixUrl: config.baseUrl,
+      cache: "no-store",
+      credentials: "include",
       timeout: config.timeout || 30000,
       retry: {
         limit: config.retryLimit || 2,
@@ -52,16 +58,55 @@ class ApiClient {
       },
       hooks: {
         beforeRequest: [
-          (request) => {
-            if (this.accessToken) {
-              request.headers.set(
-                "Authorization",
-                `Bearer ${this.accessToken}`
-              );
+          async (request) => {
+            request.headers.set("channel-id", generateHeaders()["channel-id"]);
+            request.headers.set(
+              "x-transaction-id",
+              generateHeaders()["x-transaction-id"]
+            );
+            // request.headers.set("ngrok-skip-browser-warning", "1");
+            request.headers.set(
+              "x-correlation-conversation-id",
+              generateHeaders()["x-correlation-conversation-id"]
+            );
+            request.headers.set(
+              "x-originator-conversation-id",
+              generateHeaders()["x-originator-conversation-id"]
+            );
+            request.headers.set(
+              "x-conversation-id",
+              generateHeaders()["x-conversation-id"]
+            );
+            request.headers.set("x-version", generateHeaders()["x-version"]);
+            request.headers.set(
+              "x-source-system",
+              generateHeaders()["x-source-system"]
+            );
+            request.headers.set(
+              "x-source-identity-token",
+              generateHeaders()["x-source-identity-token"]
+            );
+            const url = request.url;
+            const cookies = await cookieJar.getCookies(url);
+            const cookieString = cookies.join("; ");
+            request.headers.set("cookie", cookieString);
+
+            const token = storage.get<string>("accessToken");
+            if (token) {
+              request.headers.set("Authorization", `Bearer ${token}`);
             }
           },
         ],
         afterResponse: [
+          async (request, _options, response) => {
+            const url = request.url;
+            const cookies = response.headers.getSetCookie();
+            if (cookies) {
+              for (const cookie of cookies) {
+                await cookieJar.setCookie(cookie, url);
+              }
+            }
+          },
           async (_request, _options, response) => {
             if (!response.ok) {
               const errorData = (await response
@@ -80,15 +125,15 @@ class ApiClient {
     });
   }
 
-  setAccessToken(token: string | null) {
+  setAccessToken = (token: string | null) => {
     this.accessToken = token;
-  }
+  };
 
-  getAccessToken(): string | null {
+  getAccessToken = (): string | null => {
     return this.accessToken;
-  }
+  };
 
-  async request<T>(url: string, options?: Options): Promise<T> {
+  request = async <T>(url: string, options?: Options): Promise<T> => {
     try {
       const response = await this.client(url, options);
       return await response.json();
@@ -104,7 +149,7 @@ class ApiClient {
         error
       );
     }
-  }
+  };
 }
 
 // ============================================================================
@@ -123,9 +168,9 @@ class AuthService {
    * @param credentials - Username and password
    * @returns Authentication tokens and user data
    */
-  async login(credentials: LoginRequest): Promise<LoginResponse> {
+  login = async (credentials: LoginRequest): Promise<any> => {
     const response = await this.client.request<BaseApiResponse<LoginResponse>>(
-      "api/v1/crm/auth/login",
+      "v1/auth/crm/login",
       {
         method: "POST",
         json: credentials,
@@ -133,21 +178,25 @@ class AuthService {
     );
 
     // Store access token
-    this.client.setAccessToken(response.data.accessToken);
+    storage.set("accessToken", response.data.accessToken);
+    storage.set("user", response.data.user);
+    storage.set("sessionId", response.data.sessionId);
 
-    return response.data;
-  }
+    return {
+      success: true,
+    };
+  };
 
   /**
    * Refresh access token using refresh token
    * @param refreshToken - Valid refresh token
    * @returns New authentication tokens
    */
-  async refreshToken(
+  refreshToken = async (
     refreshToken: RefreshTokenRequest
-  ): Promise<LoginResponse> {
+  ): Promise<LoginResponse> => {
     const response = await this.client.request<BaseApiResponse<LoginResponse>>(
-      "api/v1/crm/auth/token/refresh",
+      "v1/crm/auth/token/refresh",
       {
         method: "POST",
         json: refreshToken,
@@ -158,48 +207,50 @@ class AuthService {
     this.client.setAccessToken(response.data.accessToken);
 
     return response.data;
-  }
+  };
 
   /**
    * Logout current CRM user
    */
-  async logout(): Promise<void> {
-    await this.client.request<BaseApiResponse<void>>("api/v1/crm/auth/logout", {
+  logout = async (): Promise<void> => {
+    await this.client.request<BaseApiResponse<void>>("v1/crm/auth/logout", {
       method: "POST",
     });
 
     // Clear access token
     this.client.setAccessToken(null);
-  }
+  };
 
   /**
    * Get current authenticated user profile
    * @returns CRM user profile data
    */
-  async getProfile(): Promise<CrmUser> {
+  getProfile = async (): Promise<CrmUser> => {
     const response = await this.client.request<BaseApiResponse<CrmUser>>(
-      "api/v1/crm/auth/profile",
+      "v1/crm/auth/profile",
       {
         method: "GET",
       }
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Change password for authenticated CRM user
    * @param passwordData - Current and new password
    */
-  async changePassword(passwordData: ChangePasswordRequest): Promise<void> {
+  changePassword = async (
+    passwordData: ChangePasswordRequest
+  ): Promise<void> => {
     await this.client.request<BaseApiResponse<void>>(
-      "api/v1/crm/auth/password/change",
+      "v1/crm/auth/password/change",
       {
         method: "POST",
         json: passwordData,
       }
     );
-  }
+  };
 }
 
 /**
@@ -214,18 +265,18 @@ class CustomerService {
    * @param params - Search filters
    * @returns Paginated list of customers
    */
-  async searchCustomers(
+  searchCustomers = async (
     params: CustomerSearchParams
-  ): Promise<PaginatedResponse<Customer>> {
+  ): Promise<PaginatedResponse<Customer>> => {
     const response = await this.client.request<
       BaseApiResponse<PaginatedResponse<Customer>>
-    >("api/v1/crm/customers/search", {
+    >("v1/crm/customers/search", {
       method: "GET",
       searchParams: params as Record<string, string>,
     });
 
     return response.data;
-  }
+  };
 
   /**
    * Get wallet information for a specific customer
@@ -233,12 +284,12 @@ class CustomerService {
    * @param currency - Optional currency filter
    * @returns Wallet details
    */
-  async getCustomerWallet(
+  getCustomerWallet = async (
     customerId: string,
     currency?: string
-  ): Promise<Wallet> {
+  ): Promise<Wallet> => {
     const response = await this.client.request<BaseApiResponse<Wallet>>(
-      `api/v1/crm/customers/${customerId}/wallet`,
+      `v1/crm/customers/${customerId}/wallet`,
       {
         method: "GET",
         searchParams: currency ? { currency } : undefined,
@@ -246,7 +297,7 @@ class CustomerService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Freeze a customer wallet to prevent transactions
@@ -254,33 +305,36 @@ class CustomerService {
    * @param walletId - Wallet ID
    * @param reason - Reason for freezing
    */
-  async freezeWallet(
+  freezeWallet = async (
     customerId: string,
     walletId: string,
     reason: string
-  ): Promise<void> {
+  ): Promise<void> => {
     await this.client.request<BaseApiResponse<void>>(
-      `api/v1/crm/customers/${customerId}/wallets/${walletId}/freeze`,
+      `v1/crm/customers/${customerId}/wallets/${walletId}/freeze`,
       {
         method: "POST",
         json: { reason },
       }
     );
-  }
+  };
 
   /**
    * Unfreeze a previously frozen wallet
    * @param customerId - Customer ID
    * @param walletId - Wallet ID
    */
-  async unfreezeWallet(customerId: string, walletId: string): Promise<void> {
+  unfreezeWallet = async (
+    customerId: string,
+    walletId: string
+  ): Promise<void> => {
     await this.client.request<BaseApiResponse<void>>(
-      `api/v1/crm/customers/${customerId}/wallets/${walletId}/unfreeze`,
+      `v1/crm/customers/${customerId}/wallets/${walletId}/unfreeze`,
       {
         method: "POST",
       }
     );
-  }
+  };
 
   /**
    * Get transaction history for a customer
@@ -288,10 +342,10 @@ class CustomerService {
    * @param params - Transaction filters
    * @returns Paginated transaction list
    */
-  async getCustomerTransactions(
+  getCustomerTransactions = async (
     customerId: string,
     params?: Omit<TransactionSearchParams, "userId">
-  ): Promise<PaginatedResponse<Transaction>> {
+  ): Promise<PaginatedResponse<Transaction>> => {
     const response = await this.client.request<
       BaseApiResponse<{
         transactions: Transaction[];
@@ -299,7 +353,7 @@ class CustomerService {
         page: number;
         limit: number;
       }>
-    >(`api/v1/crm/customers/${customerId}/transactions`, {
+    >(`v1/crm/customers/${customerId}/transactions`, {
       method: "GET",
       searchParams: params as Record<string, string>,
     });
@@ -310,7 +364,7 @@ class CustomerService {
       page: response.data.page,
       limit: response.data.limit,
     };
-  }
+  };
 }
 
 /**
@@ -325,9 +379,9 @@ class TransactionService {
    * @param params - Search filters
    * @returns Paginated list of transactions
    */
-  async searchTransactions(
+  searchTransactions = async (
     params: TransactionSearchParams
-  ): Promise<PaginatedResponse<Transaction>> {
+  ): Promise<PaginatedResponse<Transaction>> => {
     const response = await this.client.request<
       BaseApiResponse<{
         transactions: Transaction[];
@@ -335,7 +389,7 @@ class TransactionService {
         page: number;
         limit: number;
       }>
-    >("api/v1/crm/transactions/search", {
+    >("v1/crm/transactions/search", {
       method: "GET",
       searchParams: params as Record<string, string>,
     });
@@ -346,32 +400,35 @@ class TransactionService {
       page: response.data.page,
       limit: response.data.limit,
     };
-  }
+  };
 
   /**
    * Get detailed information about a specific transaction
    * @param txnId - Transaction ID
    * @returns Transaction details
    */
-  async getTransaction(txnId: string): Promise<Transaction> {
+  getTransaction = async (txnId: string): Promise<Transaction> => {
     const response = await this.client.request<BaseApiResponse<Transaction>>(
-      `api/v1/crm/transactions/${txnId}`,
+      `v1/crm/transactions/${txnId}`,
       {
         method: "GET",
       }
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Retry a failed transaction
    * @param txnId - Transaction ID
    * @param reason - Optional reason for retry
    */
-  async retryTransaction(txnId: string, reason?: string): Promise<Transaction> {
+  retryTransaction = async (
+    txnId: string,
+    reason?: string
+  ): Promise<Transaction> => {
     const response = await this.client.request<BaseApiResponse<Transaction>>(
-      `api/v1/crm/transactions/${txnId}/retry`,
+      `v1/crm/transactions/${txnId}/retry`,
       {
         method: "POST",
         json: reason ? { reason } : undefined,
@@ -379,19 +436,19 @@ class TransactionService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Process a refund for a transaction
    * @param txnId - Transaction ID
    * @param refundData - Refund amount and reason
    */
-  async refundTransaction(
+  refundTransaction = async (
     txnId: string,
     refundData: RefundRequest
-  ): Promise<Transaction> {
+  ): Promise<Transaction> => {
     const response = await this.client.request<BaseApiResponse<Transaction>>(
-      `api/v1/crm/transactions/${txnId}/refund`,
+      `v1/crm/transactions/${txnId}/refund`,
       {
         method: "POST",
         json: refundData,
@@ -399,19 +456,19 @@ class TransactionService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Reverse a completed transaction
    * @param txnId - Transaction ID
    * @param reason - Reason for reversal
    */
-  async reverseTransaction(
+  reverseTransaction = async (
     txnId: string,
     reason: string
-  ): Promise<Transaction> {
+  ): Promise<Transaction> => {
     const response = await this.client.request<BaseApiResponse<Transaction>>(
-      `api/v1/crm/transactions/${txnId}/reverse`,
+      `v1/crm/transactions/${txnId}/reverse`,
       {
         method: "POST",
         json: { reason },
@@ -419,7 +476,7 @@ class TransactionService {
     );
 
     return response.data;
-  }
+  };
 }
 
 /**
@@ -434,9 +491,9 @@ class CorridorService {
    * @param params - Search filters
    * @returns Paginated list of corridors
    */
-  async searchCorridors(
+  searchCorridors = async (
     params: CorridorSearchParams
-  ): Promise<PaginatedResponse<Corridor>> {
+  ): Promise<PaginatedResponse<Corridor>> => {
     const response = await this.client.request<
       BaseApiResponse<{
         corridors: Corridor[];
@@ -444,7 +501,7 @@ class CorridorService {
         page: number;
         limit: number;
       }>
-    >("api/v1/crm/corridors/search", {
+    >("v1/crm/corridors/search", {
       method: "GET",
       searchParams: params as Record<string, string>,
     });
@@ -455,16 +512,18 @@ class CorridorService {
       page: response.data.page,
       limit: response.data.limit,
     };
-  }
+  };
 
   /**
    * Create a new payment corridor
    * @param corridorData - Corridor configuration
    * @returns Created corridor
    */
-  async createCorridor(corridorData: CreateCorridorRequest): Promise<Corridor> {
+  createCorridor = async (
+    corridorData: CreateCorridorRequest
+  ): Promise<Corridor> => {
     const response = await this.client.request<BaseApiResponse<Corridor>>(
-      "api/v1/crm/corridors/",
+      "v1/crm/corridors/",
       {
         method: "POST",
         json: corridorData,
@@ -472,23 +531,42 @@ class CorridorService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Get detailed information about a corridor
    * @param corridorId - Corridor ID
    * @returns Corridor details
    */
-  async getCorridor(corridorId: string): Promise<Corridor> {
+  getCorridor = async (corridorId: string): Promise<Corridor> => {
     const response = await this.client.request<BaseApiResponse<Corridor>>(
-      `api/v1/crm/corridors/${corridorId}`,
+      `v1/crm/corridors/${corridorId}`,
       {
         method: "GET",
       }
     );
 
     return response.data;
-  }
+  };
+  /**
+   * Get a paginated list of all corridors
+   * @param page - Page number
+   * @param limit - Number of items per page
+   * @returns Paginated list of corridors
+   */
+  getCorridors = async (
+    page: number = 1,
+    limit: number = 10
+  ): Promise<PaginatedResponse<Corridor>> => {
+    const response = await this.client.request<
+      BaseApiResponse<PaginatedResponse<Corridor>>
+    >("v1/crm/corridors", {
+      method: "GET",
+      searchParams: { page: page.toString(), limit: limit.toString() },
+    });
+
+    return response.data;
+  };
 
   /**
    * Update corridor configuration
@@ -496,12 +574,12 @@ class CorridorService {
    * @param updates - Corridor updates
    * @returns Updated corridor
    */
-  async updateCorridor(
+  updateCorridor = async (
     corridorId: string,
     updates: Partial<CreateCorridorRequest>
-  ): Promise<Corridor> {
+  ): Promise<Corridor> => {
     const response = await this.client.request<BaseApiResponse<Corridor>>(
-      `api/v1/crm/corridors/${corridorId}`,
+      `v1/crm/corridors/${corridorId}`,
       {
         method: "PUT",
         json: updates,
@@ -509,34 +587,34 @@ class CorridorService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Activate a corridor to allow transactions
    * @param corridorId - Corridor ID
    */
-  async activateCorridor(corridorId: string): Promise<Corridor> {
+  activateCorridor = async (corridorId: string): Promise<Corridor> => {
     const response = await this.client.request<BaseApiResponse<Corridor>>(
-      `api/v1/crm/corridors/${corridorId}/activate`,
+      `v1/crm/corridors/${corridorId}/activate`,
       {
         method: "POST",
       }
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Deactivate a corridor to prevent new transactions
    * @param corridorId - Corridor ID
    * @param reason - Reason for deactivation
    */
-  async deactivateCorridor(
+  deactivateCorridor = async (
     corridorId: string,
     reason: string
-  ): Promise<Corridor> {
+  ): Promise<Corridor> => {
     const response = await this.client.request<BaseApiResponse<Corridor>>(
-      `api/v1/crm/corridors/${corridorId}/deactivate`,
+      `v1/crm/corridors/${corridorId}/deactivate`,
       {
         method: "POST",
         json: { reason },
@@ -544,7 +622,7 @@ class CorridorService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Get performance metrics for a corridor
@@ -553,13 +631,13 @@ class CorridorService {
    * @param endDate - End date for metrics
    * @returns Performance data
    */
-  async getCorridorPerformance(
+  getCorridorPerformance = async (
     corridorId: string,
     startDate: string,
     endDate: string
-  ): Promise<any> {
+  ): Promise<any> => {
     const response = await this.client.request<BaseApiResponse<any>>(
-      `api/v1/crm/corridors/${corridorId}/performance`,
+      `v1/crm/corridors/${corridorId}/performance`,
       {
         method: "GET",
         searchParams: { startDate, endDate },
@@ -567,7 +645,7 @@ class CorridorService {
     );
 
     return response.data;
-  }
+  };
 }
 
 /**
@@ -582,9 +660,9 @@ class CaseService {
    * @param params - Search filters
    * @returns Paginated list of cases
    */
-  async searchCases(
+  searchCases = async (
     params: CaseSearchParams
-  ): Promise<PaginatedResponse<Case>> {
+  ): Promise<PaginatedResponse<Case>> => {
     const response = await this.client.request<
       BaseApiResponse<{
         cases: Case[];
@@ -592,7 +670,7 @@ class CaseService {
         page: number;
         limit: number;
       }>
-    >("api/v1/crm/cases/search", {
+    >("v1/crm/cases/search", {
       method: "GET",
       searchParams: params as Record<string, string>,
     });
@@ -603,16 +681,16 @@ class CaseService {
       page: response.data.page,
       limit: response.data.limit,
     };
-  }
+  };
 
   /**
    * Create a new support case
    * @param caseData - Case information
    * @returns Created case
    */
-  async createCase(caseData: CreateCaseRequest): Promise<Case> {
+  createCase = async (caseData: CreateCaseRequest): Promise<Case> => {
     const response = await this.client.request<BaseApiResponse<Case>>(
-      "api/v1/crm/cases/",
+      "v1/crm/cases/",
       {
         method: "POST",
         json: caseData,
@@ -620,36 +698,54 @@ class CaseService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Get detailed information about a case
    * @param caseId - Case ID
    * @returns Case details
    */
-  async getCase(caseId: string): Promise<Case> {
+  getCase = async (caseId: string): Promise<Case> => {
     const response = await this.client.request<BaseApiResponse<Case>>(
-      `api/v1/crm/cases/${caseId}`,
+      `v1/crm/cases/${caseId}`,
       {
         method: "GET",
       }
     );
 
     return response.data;
-  }
+  };
+  /**
+   * Get a paginated list of cases
+   * @param page - Page number
+   * @param limit - Number of items per page
+   * @returns Paginated list of cases
+   */
+  getCases = async (
+    page: number = 1,
+    limit: number = 10
+  ): Promise<PaginatedResponse<Case>> => {
+    const response = await this.client.request<
+      BaseApiResponse<PaginatedResponse<Case>>
+    >("v1/crm/cases", {
+      method: "GET",
+      searchParams: { page: page.toString(), limit: limit.toString() },
+    });
 
+    return response.data;
+  };
   /**
    * Update case information
    * @param caseId - Case ID
    * @param updates - Case updates
    * @returns Updated case
    */
-  async updateCase(
+  updateCase = async (
     caseId: string,
     updates: Partial<CreateCaseRequest>
-  ): Promise<Case> {
+  ): Promise<Case> => {
     const response = await this.client.request<BaseApiResponse<Case>>(
-      `api/v1/crm/cases/${caseId}`,
+      `v1/crm/cases/${caseId}`,
       {
         method: "PUT",
         json: updates,
@@ -657,16 +753,16 @@ class CaseService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Assign a case to a user
    * @param caseId - Case ID
    * @param assigneeId - User ID to assign to
    */
-  async assignCase(caseId: string, assigneeId: string): Promise<Case> {
+  assignCase = async (caseId: string, assigneeId: string): Promise<Case> => {
     const response = await this.client.request<BaseApiResponse<Case>>(
-      `api/v1/crm/cases/${caseId}/assign`,
+      `v1/crm/cases/${caseId}/assign`,
       {
         method: "POST",
         json: { assigneeId },
@@ -674,16 +770,16 @@ class CaseService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Mark a case as resolved
    * @param caseId - Case ID
    * @param resolution - Resolution description
    */
-  async resolveCase(caseId: string, resolution: string): Promise<Case> {
+  resolveCase = async (caseId: string, resolution: string): Promise<Case> => {
     const response = await this.client.request<BaseApiResponse<Case>>(
-      `api/v1/crm/cases/${caseId}/resolve`,
+      `v1/crm/cases/${caseId}/resolve`,
       {
         method: "POST",
         json: { resolution },
@@ -691,22 +787,22 @@ class CaseService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Close a resolved case
    * @param caseId - Case ID
    */
-  async closeCase(caseId: string): Promise<Case> {
+  closeCase = async (caseId: string): Promise<Case> => {
     const response = await this.client.request<BaseApiResponse<Case>>(
-      `api/v1/crm/cases/${caseId}/close`,
+      `v1/crm/cases/${caseId}/close`,
       {
         method: "POST",
       }
     );
 
     return response.data;
-  }
+  };
 }
 
 /**
@@ -721,14 +817,14 @@ class PartnerService {
    * @param params - Search filters
    * @returns Paginated list of partners
    */
-  async searchPartners(params?: {
+  searchPartners = async (params?: {
     name?: string;
     businessType?: Partner["businessType"];
     status?: Partner["status"];
     country?: string;
     page?: number;
     limit?: number;
-  }): Promise<PaginatedResponse<Partner>> {
+  }): Promise<PaginatedResponse<Partner>> => {
     const response = await this.client.request<
       BaseApiResponse<{
         partners: Partner[];
@@ -736,7 +832,7 @@ class PartnerService {
         page: number;
         limit: number;
       }>
-    >("api/v1/crm/partners/search", {
+    >("v1/crm/partners/search", {
       method: "GET",
       searchParams: params as Record<string, string>,
     });
@@ -747,16 +843,18 @@ class PartnerService {
       page: response.data.page,
       limit: response.data.limit,
     };
-  }
+  };
 
   /**
    * Register a new partner
    * @param partnerData - Partner information
    * @returns Created partner
    */
-  async createPartner(partnerData: CreatePartnerRequest): Promise<Partner> {
+  createPartner = async (
+    partnerData: CreatePartnerRequest
+  ): Promise<Partner> => {
     const response = await this.client.request<BaseApiResponse<Partner>>(
-      "api/v1/crm/partners/",
+      "v1/crm/partners/",
       {
         method: "POST",
         json: partnerData,
@@ -764,36 +862,54 @@ class PartnerService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Get partner details
    * @param partnerId - Partner ID
    * @returns Partner details
    */
-  async getPartner(partnerId: string): Promise<Partner> {
+  getPartner = async (partnerId: string): Promise<Partner> => {
     const response = await this.client.request<BaseApiResponse<Partner>>(
-      `api/v1/crm/partners/${partnerId}`,
+      `v1/crm/partners/${partnerId}`,
       {
         method: "GET",
       }
     );
 
     return response.data;
-  }
+  };
+  /**
+   * Get a paginated list of all partners
+   * @param page - Page number
+   * @param limit - Number of items per page
+   * @returns Paginated list of partners
+   */
+  getPartners = async (
+    page: number = 1,
+    limit: number = 10
+  ): Promise<PaginatedResponse<Partner>> => {
+    const response = await this.client.request<
+      BaseApiResponse<PaginatedResponse<Partner>>
+    >("v1/crm/partners", {
+      method: "GET",
+      searchParams: { page: page.toString(), limit: limit.toString() },
+    });
 
+    return response.data;
+  };
   /**
    * Update partner information
    * @param partnerId - Partner ID
    * @param updates - Partner updates
    * @returns Updated partner
    */
-  async updatePartner(
+  updatePartner = async (
     partnerId: string,
     updates: Partial<CreatePartnerRequest>
-  ): Promise<Partner> {
+  ): Promise<Partner> => {
     const response = await this.client.request<BaseApiResponse<Partner>>(
-      `api/v1/crm/partners/${partnerId}`,
+      `v1/crm/partners/${partnerId}`,
       {
         method: "PUT",
         json: updates,
@@ -801,34 +917,34 @@ class PartnerService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Activate a partner
    * @param partnerId - Partner ID
    */
-  async activatePartner(partnerId: string): Promise<Partner> {
+  activatePartner = async (partnerId: string): Promise<Partner> => {
     const response = await this.client.request<BaseApiResponse<Partner>>(
-      `api/v1/crm/partners/${partnerId}/activate`,
+      `v1/crm/partners/${partnerId}/activate`,
       {
         method: "POST",
       }
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Deactivate a partner
    * @param partnerId - Partner ID
    * @param reason - Reason for deactivation
    */
-  async deactivatePartner(
+  deactivatePartner = async (
     partnerId: string,
     reason?: string
-  ): Promise<Partner> {
+  ): Promise<Partner> => {
     const response = await this.client.request<BaseApiResponse<Partner>>(
-      `api/v1/crm/partners/${partnerId}/deactivate`,
+      `v1/crm/partners/${partnerId}/deactivate`,
       {
         method: "POST",
         json: reason ? { reason } : undefined,
@@ -836,19 +952,19 @@ class PartnerService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Generate API key for partner integration
    * @param partnerId - Partner ID
    * @param keyData - API key configuration
    */
-  async generateApiKey(
+  generateApiKey = async (
     partnerId: string,
     keyData: { expiresInDays?: number; scopes: string[] }
-  ): Promise<any> {
+  ): Promise<any> => {
     const response = await this.client.request<BaseApiResponse<any>>(
-      `api/v1/crm/partners/${partnerId}/api-keys`,
+      `v1/crm/partners/${partnerId}/api-keys`,
       {
         method: "POST",
         json: keyData,
@@ -856,23 +972,23 @@ class PartnerService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Revoke a partner's API key
    * @param partnerId - Partner ID
    * @param keyId - API key ID
    */
-  async revokeApiKey(partnerId: string, keyId: string): Promise<any> {
+  revokeApiKey = async (partnerId: string, keyId: string): Promise<any> => {
     const response = await this.client.request<BaseApiResponse<any>>(
-      `api/v1/crm/partners/${partnerId}/api-keys/${keyId}`,
+      `v1/crm/partners/${partnerId}/api-keys/${keyId}`,
       {
         method: "DELETE",
       }
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Get settlement history for a partner
@@ -880,13 +996,13 @@ class PartnerService {
    * @param startDate - Start date
    * @param endDate - End date
    */
-  async getSettlements(
+  getSettlements = async (
     partnerId: string,
     startDate: string,
     endDate: string
-  ): Promise<any> {
+  ): Promise<any> => {
     const response = await this.client.request<BaseApiResponse<any>>(
-      `api/v1/crm/partners/${partnerId}/settlements`,
+      `v1/crm/partners/${partnerId}/settlements`,
       {
         method: "GET",
         searchParams: { startDate, endDate },
@@ -894,7 +1010,7 @@ class PartnerService {
     );
 
     return response.data;
-  }
+  };
 }
 
 /**
@@ -909,9 +1025,9 @@ class BusinessService {
    * @param params - Search filters
    * @returns Paginated list of businesses
    */
-  async searchBusinesses(
+  searchBusinesses = async (
     params: BusinessSearchParams
-  ): Promise<PaginatedResponse<Business>> {
+  ): Promise<PaginatedResponse<Business>> => {
     const response = await this.client.request<
       BaseApiResponse<{
         businesses: Business[];
@@ -919,7 +1035,7 @@ class BusinessService {
         page: number;
         limit: number;
       }>
-    >("api/v1/crm/businesses/search", {
+    >("v1/crm/businesses/search", {
       method: "GET",
       searchParams: params as Record<string, string>,
     });
@@ -930,35 +1046,54 @@ class BusinessService {
       page: response.data.page,
       limit: response.data.limit,
     };
-  }
+  };
 
   /**
    * Get business details
    * @param businessId - Business ID
    * @returns Business details
    */
-  async getBusiness(businessId: string): Promise<Business> {
+  getBusiness = async (businessId: string): Promise<Business> => {
     const response = await this.client.request<BaseApiResponse<Business>>(
-      `api/v1/crm/businesses/${businessId}`,
+      `v1/crm/businesses/${businessId}`,
       {
         method: "GET",
       }
     );
 
     return response.data;
-  }
+  };
+  /**
+   * Get a paginated list of businesses
+   * @param page - Page number
+   * @param limit - Number of items per page
+   * @returns Paginated list of businesses
+   */
+  getBusinesses = async (
+    page: number = 1,
+    limit: number = 10
+  ): Promise<PaginatedResponse<Business>> => {
+    const response = await this.client.request<
+      BaseApiResponse<PaginatedResponse<Business>>
+    >("v1/crm/businesses", {
+      method: "GET",
+      searchParams: { page: page.toString(), limit: limit.toString() },
+    });
+
+    return response.data;
+  };
 
   /**
    * Approve business KYC verification
    * @param businessId - Business ID
    * @param approvalData - Comments and risk score
    */
-  async approveKyc(
+  approveKyc = async (
     businessId: string,
     approvalData?: { comments?: string; riskScore?: number }
-  ): Promise<any> {
+  ): Promise<any> => {
     const response = await this.client.request<BaseApiResponse<any>>(
-      `api/v1/crm/businesses/${businessId}/kyc/approve`,
+      `v1/crm/businesses/${businessId}/kyc/approve`,
       {
         method: "POST",
         json: approvalData,
@@ -966,19 +1101,19 @@ class BusinessService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Reject business KYC verification
    * @param businessId - Business ID
    * @param rejectionData - Reason and review notes
    */
-  async rejectKyc(
+  rejectKyc = async (
     businessId: string,
     rejectionData: { reason: string; reviewNotes?: string }
-  ): Promise<any> {
+  ): Promise<any> => {
     const response = await this.client.request<BaseApiResponse<any>>(
-      `api/v1/crm/businesses/${businessId}/kyc/reject`,
+      `v1/crm/businesses/${businessId}/kyc/reject`,
       {
         method: "POST",
         json: rejectionData,
@@ -986,19 +1121,19 @@ class BusinessService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Suspend a business account
    * @param businessId - Business ID
    * @param suspensionData - Reason and optional end date
    */
-  async suspendBusiness(
+  suspendBusiness = async (
     businessId: string,
     suspensionData: { reason: string; suspendUntil?: string }
-  ): Promise<any> {
+  ): Promise<any> => {
     const response = await this.client.request<BaseApiResponse<any>>(
-      `api/v1/crm/businesses/${businessId}/suspend`,
+      `v1/crm/businesses/${businessId}/suspend`,
       {
         method: "POST",
         json: suspensionData,
@@ -1006,29 +1141,29 @@ class BusinessService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Activate a suspended or inactive business
    * @param businessId - Business ID
    */
-  async activateBusiness(businessId: string): Promise<any> {
+  activateBusiness = async (businessId: string): Promise<any> => {
     const response = await this.client.request<BaseApiResponse<any>>(
-      `api/v1/crm/businesses/${businessId}/activate`,
+      `v1/crm/businesses/${businessId}/activate`,
       {
         method: "POST",
       }
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Update business profile
    * @param businessId - Business ID
    * @param updates - Profile updates
    */
-  async updateProfile(
+  updateProfile = async (
     businessId: string,
     updates: {
       name?: string;
@@ -1039,9 +1174,9 @@ class BusinessService {
       industry?: string;
       metadata?: Record<string, any>;
     }
-  ): Promise<any> {
+  ): Promise<any> => {
     const response = await this.client.request<BaseApiResponse<any>>(
-      `api/v1/crm/businesses/${businessId}/profile`,
+      `v1/crm/businesses/${businessId}/profile`,
       {
         method: "PUT",
         json: updates,
@@ -1049,7 +1184,7 @@ class BusinessService {
     );
 
     return response.data;
-  }
+  };
 }
 
 /**
@@ -1063,16 +1198,16 @@ class DashboardService {
    * Get real-time platform KPIs
    * @returns Current KPI metrics
    */
-  async getKPIs(): Promise<DashboardKPIs> {
+  getKPIs = async (): Promise<DashboardKPIs> => {
     const response = await this.client.request<BaseApiResponse<DashboardKPIs>>(
-      "api/v1/crm/dashboard/kpis",
+      "v1/crm/dashboard/kpis",
       {
         method: "GET",
       }
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Get cached metrics for a date range
@@ -1081,13 +1216,13 @@ class DashboardService {
    * @param endDate - End date
    * @returns Historical metrics
    */
-  async getMetrics(
+  getMetrics = async (
     metricType: "DAILY" | "WEEKLY" | "MONTHLY",
     startDate: string,
     endDate: string
-  ): Promise<any[]> {
+  ): Promise<any[]> => {
     const response = await this.client.request<BaseApiResponse<any[]>>(
-      "api/v1/crm/dashboard/metrics",
+      "v1/crm/dashboard/metrics",
       {
         method: "GET",
         searchParams: { metricType, startDate, endDate },
@@ -1095,31 +1230,33 @@ class DashboardService {
     );
 
     return response.data;
-  }
+  };
 
   /**
    * Get trend analysis comparing periods
    * @param metricType - Type of trend analysis
    * @returns Trend comparison data
    */
-  async getTrends(metricType: "DAILY" | "WEEKLY" | "MONTHLY"): Promise<{
+  getTrends = async (
+    metricType: "DAILY" | "WEEKLY" | "MONTHLY"
+  ): Promise<{
     current: any;
     previous: any | null;
     changes: any | null;
-  }> {
+  }> => {
     const response = await this.client.request<
       BaseApiResponse<{
         current: any;
         previous: any | null;
         changes: any | null;
       }>
-    >("api/v1/crm/dashboard/trends", {
+    >("v1/crm/dashboard/trends", {
       method: "GET",
       searchParams: { metricType },
     });
 
     return response.data;
-  }
+  };
 }
 
 // ============================================================================
@@ -1140,7 +1277,6 @@ export class IndraPayCrmApi {
 
   constructor(config: ApiClientConfig) {
     this.client = new ApiClient(config);
-
     // Initialize all services
     this.auth = new AuthService(this.client);
     this.customers = new CustomerService(this.client);
@@ -1156,16 +1292,17 @@ export class IndraPayCrmApi {
    * Set the access token for authenticated requests
    * @param token - JWT access token
    */
-  setAccessToken(token: string | null): void {
+  setAccessToken = (token: string | null): void => {
     this.client.setAccessToken(token);
-  }
+  };
 
   /**
    * Get the current access token
    * @returns Current access token or null
    */
-  getAccessToken(): string | null {
+  getAccessToken = (): string | null => {
     return this.client.getAccessToken();
-  }
+  };
 }
+
 export type ApiClientType = InstanceType<typeof IndraPayCrmApi>;

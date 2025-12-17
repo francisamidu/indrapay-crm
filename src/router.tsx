@@ -9,7 +9,7 @@ import { generateHeaders } from "./lib/utils";
 import { routeTree } from "./routeTree.gen";
 import type { User } from "./types";
 
-const apiClient = new IndraPayCrmApi({
+export const apiClient = new IndraPayCrmApi({
   baseUrl: import.meta.env.VITE_API_URL || "http://localhost:4000",
   headers: {
     ...generateHeaders(),

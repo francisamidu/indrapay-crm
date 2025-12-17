@@ -1,4 +1,5 @@
 import Overview from "@/components/dashboard/home/overview";
+import { storage } from "@/lib/storage";
 import { createFileRoute } from "@tanstack/react-router";
 
 function DashboardPage() {
@@ -16,5 +17,9 @@ export const Route = createFileRoute("/_dashboard/dashboard/")({
         return apiClient.dashboard.getKPIs();
       },
     });
+  },
+  beforeLoad: async () => {
+    storage.get<string>("accessToken") ||
+      window.location.replace("/auth/login");
   },
 });

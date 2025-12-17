@@ -22,6 +22,8 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { randomVibrantColor } from "@/lib/colors";
+import { formatCurrency } from "@/lib/format";
 import {
   IconActivity as Activity,
   IconAlertTriangle as AlertTriangle,
@@ -58,16 +60,38 @@ const Overview: React.FC = () => {
     },
   ]);
   const data = useLoaderData({
-    from: "/(dashboard)/",
+    from: "/_dashboard/dashboard/",
   });
-  console.log(data);
+
+  // const { data: metrics } = useQuery({
+  //   queryKey: [TimeFrame.MONTHLY, "2025-07-01", "2025-08-30"],
+  //   queryFn: ({ queryKey }) => {
+  //     const [metricType, startDate, endDate] = queryKey as [
+  //       TimeFrame,
+  //       string,
+  //       string,
+  //     ];
+  //     return apiClient.dashboard.getMetrics(
+  //       metricType as unknown as "DAILY" | "WEEKLY" | "MONTHLY",
+  //       startDate,
+  //       endDate
+  //     );
+  //   },
+  //   retry: false,
+  // });
+
+  // const { data: corridors } = useQuery({
+  //   queryKey: ["corridors"],
+  //   queryFn: () => apiClient.corridors.getCorridors(),
+  // });
+
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const [kpiData] = useState<any>({
-    totalTransactions: 24567,
-    activeWallets: 1847,
-    successRate: 98.7,
-    totalVolume: 2847392,
+    totalTransactions: data.transactions.total,
+    activeWallets: data.customers.activeWallets,
+    successRate: data.transactions.growthRate,
+    totalVolume: data.corridors.totalVolume,
   });
 
   const [recentTransactions] = useState<any[]>([
@@ -116,15 +140,12 @@ const Overview: React.FC = () => {
     { month: "Aug", volume: 156000, transactions: 2980 },
   ]);
 
-  const [corridorData] = useState<any[]>([
-    { name: "USD-KES", transactions: 4200, volume: 1250000, color: "#3b82f6" },
-    { name: "GBP-USD", transactions: 2800, volume: 835000, color: "#f59e0b" },
-    { name: "EUR-JPY", transactions: 1800, volume: 537000, color: "#ec4899" },
-    { name: "KES-OTH", transactions: 1200, volume: 358000, color: "#10b981" },
-    { name: "USD-EUR", transactions: 800, volume: 240000, color: "#8b5cf6" },
-    { name: "USD-JPY", transactions: 600, volume: 180000, color: "#14b8a6" },
-    { name: "KES-USD", transactions: 400, volume: 120000, color: "#f43f5e" },
-  ]);
+  const corridorData = data.corridors.topPerforming.map((c) => ({
+    name: c.corridorName,
+    volume: c.totalVolume,
+    transactions: c.transactionCount,
+    color: randomVibrantColor(),
+  }));
 
   const barChartConfig = {
     volume: {
@@ -254,7 +275,7 @@ const Overview: React.FC = () => {
             </CardHeader>
             <CardContent>
               <h1 className="text-2xl font-bold text-card-foreground">
-                ${kpiData.totalVolume.toLocaleString()}
+                {formatCurrency(kpiData.totalVolume)}
               </h1>
             </CardContent>
           </Card>

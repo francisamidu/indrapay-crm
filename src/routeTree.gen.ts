@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteRouteImport } from './routes/_dashboard/route'
 import { Route as AuthRouteRouteImport } from './routes/_auth/route'
+import { Route as RouteRouteImport } from './routes/route'
 import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard/dashboard/index'
 import { Route as DashboardDashboardWalletManagementIndexRouteImport } from './routes/_dashboard/dashboard/wallet-management/index'
 import { Route as DashboardDashboardTransactionsIndexRouteImport } from './routes/_dashboard/dashboard/transactions/index'
@@ -33,6 +34,11 @@ const DashboardRouteRoute = DashboardRouteRouteImport.update({
 } as any)
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RouteRoute = RouteRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardDashboardIndexRoute = DashboardDashboardIndexRouteImport.update({
@@ -122,6 +128,7 @@ const AuthAuthForgotPasswordIndexRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof RouteRoute
   '/dashboard': typeof DashboardDashboardIndexRoute
   '/auth/forgot-password': typeof AuthAuthForgotPasswordIndexRoute
   '/auth/login': typeof AuthAuthLoginIndexRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/wallet-management': typeof DashboardDashboardWalletManagementIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof RouteRoute
   '/dashboard': typeof DashboardDashboardIndexRoute
   '/auth/forgot-password': typeof AuthAuthForgotPasswordIndexRoute
   '/auth/login': typeof AuthAuthLoginIndexRoute
@@ -157,6 +165,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof RouteRoute
   '/_auth': typeof AuthRouteRouteWithChildren
   '/_dashboard': typeof DashboardRouteRouteWithChildren
   '/_dashboard/dashboard/': typeof DashboardDashboardIndexRoute
@@ -178,6 +187,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/dashboard'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/dashboard/wallet-management'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/dashboard'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/dashboard/wallet-management'
   id:
     | '__root__'
+    | '/'
     | '/_auth'
     | '/_dashboard'
     | '/_dashboard/dashboard/'
@@ -232,6 +244,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  RouteRoute: typeof RouteRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
 }
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof AuthRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof RouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_dashboard/dashboard/': {
@@ -415,6 +435,7 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  RouteRoute: RouteRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
 }

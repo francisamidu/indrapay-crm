@@ -1,15 +1,17 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { apiClient } from "@/router";
 import { useQuery } from "@tanstack/react-query";
 
 // Mock data for corridor performance
@@ -27,10 +29,11 @@ const fetchCorridorData = async () => {
 
 export function CorridorPerformanceChart() {
   const { data, isLoading, error } = useQuery({
-    queryKey: ["corridor-data"],
-    queryFn: fetchCorridorData,
+    queryKey: ["kpis"],
+    queryFn: apiClient.dashboard.getKPIs,
   });
 
+  console.log(data);
   if (isLoading) {
     return (
       <Card>

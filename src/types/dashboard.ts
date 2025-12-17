@@ -34,4 +34,11 @@ interface DashboardKPIs {
   };
 }
 
+enum TimeFrame {
+  DAILY = "DAILY",
+  WEEKLY = "WEEKLY",
+  MONTHLY = "MONTHLY",
+}
+
 export type { DashboardKPIs };
+export { TimeFrame };

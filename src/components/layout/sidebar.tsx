@@ -14,7 +14,6 @@ import { Button } from "../ui/button";
 export function Sidebar() {
   const pathname = useLocation().pathname;
   const { menuItems: navigation } = useMenuContext();
-  console.log("Sidebar navigation items:", navigation);
   return (
     <div className="w-64 !bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col h-full overflow-y-auto fixed top-0 left-0 z-20">
       <div className="flex flex-grow flex-col overflow-y-auto pt-5">
@@ -31,9 +30,8 @@ export function Sidebar() {
           <nav className="flex-1 space-y-1  pb-4">
             {navigation.map((item) => {
               const isActive =
-                item.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(item.href);
+                item.href === "/" ? pathname === "/" : pathname === item.href;
+
               return (
                 <Link
                   key={item.name}

@@ -1,16 +1,41 @@
-interface AuthHeaderProps {
-  title?: string
-  subtitle?: string
-}
+import { Button } from "@/components/ui/button";
+import { useLocation, useRouter } from "@tanstack/react-router";
 
-export function AuthHeader({ title, subtitle }: AuthHeaderProps) {
+export function AuthHeader() {
+  const location = useLocation();
+  const router = useRouter();
+  const redirectTo = () => {
+    if (location.pathname.includes("login")) {
+      router.navigate({ to: "/auth/signup" });
+    }
+    if (location.pathname.includes("signup")) {
+      router.navigate({ to: "/auth/login" });
+    }
+    return "/";
+  };
   return (
-    <div className="flex flex-col items-center text-center space-y-2 mb-8">
-      <div className="h-12 w-12 bg-slate-900 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4 shadow-xl">
-        S
+    <nav className="w-full flex items-center justify-between py-3 px-6 bg-white border-b border-slate-200">
+      <div className="text-xl font-bold text-slate-700">Indrapay CRM</div>
+      <div>
+        {location.pathname.includes("login") && (
+          <Button
+            size="lg"
+            className="text-sm text-white hover:bg-slate-800"
+            onClick={redirectTo}
+          >
+            Sign Up
+          </Button>
+        )}
+        {location.pathname.includes("signup") && (
+          <Button
+            size="lg"
+            className="text-sm text-white hover:bg-slate-800"
+            onClick={redirectTo}
+          >
+            Log In
+          </Button>
+        )}
       </div>
-      {title && <h1 className="text-3xl font-bold tracking-tight text-slate-900">{title}</h1>}
-      {subtitle && <p className="text-slate-500 text-sm max-w-xs mx-auto">{subtitle}</p>}
-    </div>
-  )
+    </nav>
+  );
 }
