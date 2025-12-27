@@ -1,13 +1,13 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useMemo, useState } from "react";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Sheet,
   SheetContent,
@@ -23,24 +22,26 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { formatDateTime } from "@/lib/format";
+import type { Customer } from "@/types/customer";
 import {
-  IconCircle as XCircle,
-  IconUsers as Users,
-  IconAlertTriangle as AlertTriangle,
-  IconCircleCheck as CheckCircle,
   IconActivity as Activity,
-  IconFilter as Filter,
+  IconAlertCircle as AlertCircle,
+  IconAlertTriangle as AlertTriangle,
+  IconCircle as XCircle,
+  IconCircleCheck as CheckCircle,
+  IconClock as Clock,
   IconDownload as Download,
   IconEye as Eye,
-  IconShield as Shield,
   IconFileText as FileText,
-  IconClock as Clock,
-  IconAlertCircle as AlertCircle,
+  IconFilter as Filter,
   IconFlag as Flag,
   IconLockOpen as Zap,
+  IconShield as Shield,
+  IconUsers as Users,
 } from "@tabler/icons-react";
-import type { Customer } from "@/types/compliance";
-import { formatDateTime } from "@/lib/utils";
 
 interface ComplianceKPIs {
   pendingVerifications: { count: number; change: number };

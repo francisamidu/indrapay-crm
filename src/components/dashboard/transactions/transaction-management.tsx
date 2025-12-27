@@ -1,18 +1,10 @@
-"use client";
-
 import type React from "react";
-import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useEffect, useMemo, useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -28,21 +20,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { formatCurrency, formatDateTime } from "@/lib/format";
+import {
+  IconActivity as Activity,
+  IconArrowsUpDown as ArrowUpDown,
+  IconBan as Ban,
+  IconCalendar as Calendar,
   IconCircleCheck as CheckCircle,
   IconCircleX as CircleX,
-  IconActivity as Activity,
-  IconFilter as Filter,
   IconDots as MoreHorizontal,
   IconDownload as Download,
-  IconCalendar as Calendar,
-  IconRefresh as RefreshCw,
-  IconArrowsUpDown as ArrowUpDown,
   IconEye as Eye,
+  IconFilter as Filter,
+  IconRefresh as RefreshCw,
   IconRotateClockwise as RotateCcw,
-  IconBan as Ban,
 } from "@tabler/icons-react";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
-import type { TransactionDetail, TransactionKPIs } from "@/types/transactions";
 
 const TransactionManagement: React.FC<{
   onNavigate?: (page: string) => void;
@@ -56,8 +54,9 @@ const TransactionManagement: React.FC<{
   const [corridorFilter, _setCorridorFilter] = useState<string>("all");
   const [typeFilter, _setTypeFilter] = useState<string>("all");
   const [dateRange, setDateRange] = useState("7days");
-  const [selectedTransaction, setSelectedTransaction] =
-    useState<TransactionDetail | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<any | null>(
+    null
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -67,7 +66,7 @@ const TransactionManagement: React.FC<{
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const [kpiData] = useState<TransactionKPIs>({
+  const [kpiData] = useState<any>({
     paymentSuccess: { amount: 2847392, change: 12.5 },
     paymentPending: { amount: 156780, change: -2.1 },
     totalProcessed: { count: 24567, change: 8.3 },
@@ -75,7 +74,7 @@ const TransactionManagement: React.FC<{
     totalCancelled: { count: 432, change: -15.2 },
   });
 
-  const [transactions] = useState<TransactionDetail[]>([
+  const [transactions] = useState<any[]>([
     {
       id: "TXN-D983274",
       amount: 1250.0,

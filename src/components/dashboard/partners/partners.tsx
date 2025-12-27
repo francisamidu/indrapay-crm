@@ -1,12 +1,28 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useEffect, useMemo, useState } from "react";
+
+import {
+  Building2,
+  CheckCircle,
+  DollarSign,
+  Download,
+  Edit,
+  Eye,
+  FileText,
+  MapPin,
+  MoreHorizontal,
+  Plus,
+  TrendingUp,
+  Upload,
+  XCircle,
+} from "lucide-react";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -14,14 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -31,36 +40,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Search,
-  Bell,
-  Settings,
-  CreditCard,
-  Users,
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Wallet,
-  BarChart3,
-  Download,
-  Eye,
-  Globe,
-  Shield,
-  FileText,
-  Plus,
-  Building2,
-  MapPin,
-  DollarSign,
-  Upload,
-  Edit,
-  MoreHorizontal,
-} from "lucide-react";
-import type { Partner, SettlementReport } from "@/types/partners";
-import { formatCurrency } from "@/lib/utils";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatCurrency } from "@/lib/format";
+import type { Partner } from "@/types/partners";
 
-const PartnersManagement: React.FC<{ onNavigate?: (page: string) => void }> = ({
-  onNavigate,
-}) => {
+const PartnersManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedPartners, setSelectedPartners] = useState<string[]>([]);
@@ -87,7 +77,7 @@ const PartnersManagement: React.FC<{ onNavigate?: (page: string) => void }> = ({
       email: "contact@techpay.com",
       phone: "+1-555-0123",
       country: "United States",
-      status: "active",
+      status: "ACTIVE",
       registrationDate: "2023-06-15T10:30:00Z",
       lastActivity: "2024-01-15T14:20:00Z",
       totalVolume: 2450000,
@@ -683,7 +673,7 @@ const PartnersManagement: React.FC<{ onNavigate?: (page: string) => void }> = ({
                   </div>
 
                   <div className="flex gap-2">
-                    {selectedPartner.status === "active" ? (
+                    {selectedPartner.status === "ACTIVE" ? (
                       <Button
                         variant="destructive"
                         onClick={() => handleSuspendPartner(selectedPartner.id)}
